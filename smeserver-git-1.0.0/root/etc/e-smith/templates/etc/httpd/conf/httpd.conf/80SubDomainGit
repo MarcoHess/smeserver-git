@@ -34,7 +34,7 @@
   # This section will configure a virtual host with the necessary directory settings to
   # enable the webserver to manage the configured repositories
   
-  use esmith::ConfigDB;      # General semserver-git configuration
+  use esmith::ConfigDB;      # General smeserver-git configuration
   use esmith::NetworksDB;    # Get the network IP address configuration
   use esmith::AccountsDB;    # Collect users that are members of a group
   use esmith::GitDB;         # Contains all git repositories configuration data
