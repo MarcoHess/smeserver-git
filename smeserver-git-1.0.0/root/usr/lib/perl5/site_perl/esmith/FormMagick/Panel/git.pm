@@ -298,8 +298,7 @@ sub git_repository_print_name_field {
   my $self = shift;
   my $in = $self->{cgi}->param('name') || '';
   my $action = $self->{cgi}->param('action') || '';
-  my $recMaxLength = $config_db->get('maxRepositoryNameLength');
-  my $maxLength = $recMaxLength->value;
+  my $maxLength = $config_db->get_prop('git', 'maxNameLength' ) || '31';
   
   print qq(<tr><td colspan="2">) . $self->localise('GIT_NAME_FIELD_DESC', {maxLength => $maxLength}) . qq(</td></tr>);
       
@@ -729,9 +728,11 @@ sub git_repository_validate_name_length {
   my( $self, $data ) = @_;
   $config_db->reload();
   my $max;
-  if( my $max_record = $config_db->get( 'maxRepositoryNameLength' ) ) {
-    $max = $max_record->value();
-  }
+  if( my $max_record = $config_db->get_prop( 'git', 'maxNameLength' ) ) {
+    $max = $max_record;
+  } else {
+    $max = 31;
+  }  
 
   if( length($data) <= $max ) {
     return "OK";
