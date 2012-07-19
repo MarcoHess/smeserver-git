@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 2
+%define release 3
 Summary: smeserver-git provides integration for centralised git respositories on an smeserver
 Name: %{name}
 Version: %{version}
@@ -27,6 +27,11 @@ installes and enables a virtual server 'git' on the current host like in
 git.host.com. Repositories are then available as https://git.host.com/gitrepo.git.
 
 %changelog
+* Thu Jul 19 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
+- Ensure git database is present in /home/e-smith/db
+- Create default config database entries for 'git'
+- Moved retrieving maxNameLength for panel validations from config 'git'
+
 * Sun Jun 17 2012 Jonathan Martens <smeserver-contribs@snetram.nl> 1.0.0-2
 - Rip out gitweb and create tgz file
 
