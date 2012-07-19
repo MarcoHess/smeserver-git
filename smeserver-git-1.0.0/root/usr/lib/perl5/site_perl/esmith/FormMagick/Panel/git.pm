@@ -41,7 +41,7 @@ use File::Basename;
 use Exporter;
 use Carp;
 
-use constant TRUE => 1;
+use constant TRUE  => 1;
 use constant FALSE => 0;
 
 our @ISA = qw(esmith::FormMagick Exporter);
