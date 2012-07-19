@@ -20,7 +20,7 @@
     <trans>
       <![CDATA[ 
         <p>This panel allows managing centralised Git repositories on this server.</p>
-        <p>Configured Git repositories be available through the git subdomain and via HTTPS like in https://git.thisserver.com/repositoruy.git.</p>
+        <p>Configured Git repositories be available through the git subdomain and via HTTPS like in https://git.thisserver.com/repository.git.</p>
         <p>The Git repositories can also be viewed through a web interface from the top of the git subdomain (i.e. https://git.thisserver.com).</p>
         <p>For more details and documentation on using Git, click on the Git logo on the left.</p>
       ]]>
@@ -36,7 +36,7 @@
 	  <base>GIT_REPOSITORY_LIST_DESCRIPTION</base>
     <trans>
       <![CDATA[ 
-        <p>The table below lists the currently configured git repositories on this server.</p>
+        <p>The table below lists the currently configured Git repositories on this server.</p>
         <p>The <b>bold</b> entries in the <b>Pull Access</b> and <b>Push Access</b> columns correspond to the 
         user groups on this server. Non-bold entries are individual users.</p>
         <p>You can modify the settings of a Git repository or remove a Git repository by clicking on the corresponding command in the <b>Action</b> column.</p>
@@ -137,9 +137,9 @@ characters.</trans>
     <trans>
       <![CDATA[ <p> Use the selection boxes below to you configure the pull and push permissions for the Git repository.<br />
       Select either groups or individual users. Press the SHIFT key to select multiple groups or users.<br />
-      If you set neither a group or user setting, the repositoty will be accessible anonymously (i.e. no user name or password will be required).<br />
+      If you set <b>neither</b> a group or user setting, the repositoty will be accessible <b>anonymously</b>! (i.e. no user name or password will be required).<br />
       If you specify users or groups for pull permissions, the push users will also have pull access.<br />
-      If you want your user(s) or group(s) to have exclusive full pull and push access specify them in both the pull and push box.</p> ]]>
+      If you want your user(s) or group(s) to have exclusive full pull and push access, specify them in <b>both</b> the pull and push box.</p> ]]>
     </trans>
   </entry>
   
