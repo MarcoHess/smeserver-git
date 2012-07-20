@@ -312,6 +312,6 @@
     }
 
     $OUT .= "\n  </Location> # /push/$git_repository.git\n\n";
-    }
+  }
   $OUT .= "</VirtualHost>\n\n";
 }
