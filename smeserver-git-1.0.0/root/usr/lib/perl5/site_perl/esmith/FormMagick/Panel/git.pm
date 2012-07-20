@@ -188,8 +188,7 @@ sub git_repository_print_table {
   
   my @repositories = $git_db->get_all_by_prop('type' => 'repository');
 
-  unless ( scalar @repositories )
-  {
+  unless( scalar @repositories ) {
     print qq(<tr><td colspan="2"><p>) . $self->localise('GIT_NOTIFY_NO_REPOSITORIES') . qq(</a></td></tr>);
     return "";
   }
@@ -319,8 +318,7 @@ sub git_repository_print_name_field {
     # them in the cgi object so our form will have the correct
     # info displayed.
     my $q = $self->{cgi};
-    if ($repository)
-    {
+    if( $repository ) {
       $q->param(-name=>'description',       -value=>$repository->prop('description'));
       $q->param(-name=>'allow_access_from', -value=>$repository->prop('allow_access_from'));
       $q->param(-name=>'pull_groups',       -value=>join(FS, split(FS, $repository->prop('pull_groups'))));
@@ -387,7 +385,7 @@ sub git_repository_handle_create_or_modify {
   } else {
     $self->git_respository_handle_modify();
   }
-}
+}8
 
 #----------------------------------------------------------------------
 # git_repository_handle_create()
@@ -399,26 +397,22 @@ sub git_repository_handle_create {
   my $msg;
 
   $msg = $self->git_repository_validate_name($repositoryName);
-  unless ($msg eq "OK")
-  {
+  unless( $msg eq "OK" ) {
     return $self->error($msg);
   }
 
   $msg = $self->git_repository_validate_name_length($repositoryName);
-  unless ($msg eq "OK")
-  {
+  unless( $msg eq "OK" ) {
     return $self->error($msg);
   }
 
   $msg = $self->git_repository_validate_name_does_not_exist($repositoryName);
-  unless ($msg eq "OK")
-  {
+  unless( $msg eq "OK" ) {
     return $self->error($msg);
   }
 
   $msg = $self->validate_radio($self->cgi->param('allow_access_from'));
-  unless ($msg eq "OK")
-  {
+  unless( $msg eq "OK" ) {
     return $self->error($msg);
   }
 
@@ -455,7 +449,7 @@ sub git_repository_handle_create {
   my $users_allowed_to_push = "";
   my @push_users = $self->cgi->param('push_users');
   foreach my $push_user (@push_users) {
-    if ($users_allowed_to_push) {
+    if( $users_allowed_to_push ) {
       $users_allowed_to_push .= "," . $push_user;
     } else {
       $users_allowed_to_push = $push_user;
@@ -466,7 +460,7 @@ sub git_repository_handle_create {
   # which can be the case when the previous one was deleted but not properly
   # cleaned up.
   
-  if (my $repository = $git_db->new_record($repositoryName, 
+  if( my $repository = $git_db->new_record($repositoryName, 
        {
           description       => $self->cgi->param('description'),
           pull_groups       => "$groups_allowed_to_pull",
@@ -475,12 +469,11 @@ sub git_repository_handle_create {
           push_users        => "$users_allowed_to_push",
           allow_access_from => $self->cgi->param('allow_access_from'),
           type              => 'repository',
-        } ) )
-  {
+        } ) ) {
     # Untaint $name before use in system()
     $repositoryName =~ /(.+)/; 
     $repositoryName = $1;
-    if (system ("/sbin/e-smith/signal-event", "git-repository-create", $repositoryName) == 0) {
+    if( system ("/sbin/e-smith/signal-event", "git-repository-create", $repositoryName) == 0 ) {
       $self->success("GIT_SUCCESS_CREATED_REPOSITORY");
     } else {
       $self->error("GIT_ERROR_CREATING_REPOSITORY");
@@ -500,21 +493,19 @@ sub git_respository_handle_modify {
   my $msg;
 
   $msg = $self->git_repository_validate_name($repositoryName);
-  unless ($msg eq "OK")
-  {
+  unless ($msg eq "OK" ) {
     return $self->error($msg);
   }
 
   $msg = $self->validate_radio($self->cgi->param('allow_access_from'));
-  unless ($msg eq "OK")
-  {
+  unless( $msg eq "OK" ) {
     return $self->error($msg);
   }
 
   my $groups_allowed_to_pull = "";
   my @pull_groups = $self->cgi->param('pull_groups');
   foreach my $pull_group (@pull_groups) {
-    if ($groups_allowed_to_pull) {
+    if( $groups_allowed_to_pull ) {
       $groups_allowed_to_pull .= "," . $pull_group;
     } else {
       $groups_allowed_to_pull = $pull_group;
@@ -524,7 +515,7 @@ sub git_respository_handle_modify {
   my $users_allowed_to_pull = "";
   my @pull_users = $self->cgi->param('pull_users');
   foreach my $pull_user (@pull_users) {
-    if ($users_allowed_to_pull) {
+    if( $users_allowed_to_pull ) {
       $users_allowed_to_pull .= "," . $pull_user;
     } else {
       $users_allowed_to_pull = $pull_user;
@@ -534,7 +525,7 @@ sub git_respository_handle_modify {
   my $groups_allowed_to_push = "";
   my @push_groups = $self->cgi->param('push_groups');
   foreach my $push_group (@push_groups) {
-    if ($groups_allowed_to_push) {
+    if( $groups_allowed_to_push ) {
       $groups_allowed_to_push .= "," . $push_group;
     } else {
       $groups_allowed_to_push = $push_group;
@@ -544,15 +535,15 @@ sub git_respository_handle_modify {
   my $users_allowed_to_push = "";
   my @push_users = $self->cgi->param('push_users');
   foreach my $push_user (@push_users) {
-    if ($users_allowed_to_push) {
+    if( $users_allowed_to_push ) {
       $users_allowed_to_push .= "," . $push_user;
     } else {
       $users_allowed_to_push = $push_user;
     }
   }
 
-  if (my $repository = $git_db->get($repositoryName)) {
-    if ($repository->prop('type') eq 'repository') {
+  if( my $repository = $git_db->get($repositoryName) ) {
+    if( $repository->prop('type') eq 'repository' ) {
       $repository->merge_props( description       => $self->cgi->param('description'),
                                 pull_groups       => "$groups_allowed_to_pull",
                                 pull_users        => "$users_allowed_to_pull",
@@ -565,7 +556,7 @@ sub git_respository_handle_modify {
       # Untaint $name before use in system()
       $repositoryName =~ /(.+)/; 
       $repositoryName = $1;
-      if (system ("/sbin/e-smith/signal-event", "git-repository-modify", $repositoryName) == 0) {
+      if( system ("/sbin/e-smith/signal-event", "git-repository-modify", $repositoryName) == 0 ) {
         $self->success("GIT_SUCCESS_MODIFIED_REPOSITORY");
       } else {
         $self->error("GIT_ERROR_MODIFYING_REPOSITORY");
@@ -585,14 +576,14 @@ sub git_respository_handle_modify {
 sub git_repository_handle_remove {
   my ($self) = @_;
   my $repositoryName = $self->cgi->param('name');
-  if (my $repository = $git_db->get($repositoryName)) {
-    if ($repository->prop('type') eq 'repository') {
+  if( my $repository = $git_db->get($repositoryName) ) {
+    if( $repository->prop('type') eq 'repository' ) {
       $repository->set_prop('type', 'repository-deleted');
 
       # Untaint $repository_name before use in system() ????
       $repositoryName =~ /(.+)/; 
       $repositoryName = $1;
-      if (system ("/sbin/e-smith/signal-event", "git-repository-delete", $repositoryName) == 0) {
+      if( system ("/sbin/e-smith/signal-event", "git-repository-delete", $repositoryName) == 0 ) {
         $self->success("GIT_SUCCESS_DELETED_REPOSITORY");
         $repository->delete();
       } else {
@@ -602,7 +593,7 @@ sub git_repository_handle_remove {
       $self->error('GIT_ERROR_CANT_FIND_REPOSITORY');
     }
   } else {
-      $self->error('GIT_ERROR_CANT_FIND_REPOSITORY');
+    $self->error('GIT_ERROR_CANT_FIND_REPOSITORY');
   }
   $self->wherenext('First');
 }
@@ -627,11 +618,9 @@ sub getExtraParams
   my $repositoryName        = $q->param('name');
   my $repositoryDescription = '';
 
-  if ($repositoryName)
-  {
+  if($repositoryName ) {
     my $repository = $git_db->get($repositoryName);
-    if ($repository)
-    {
+    if( $repository ) {
       $repositoryDescription = $repository->prop('description');
     }
   }
@@ -646,8 +635,7 @@ sub getExtraParams
 
 sub git_repository_validate_name {
   my( $self, $repositoryName ) = @_;
-  unless ($repositoryName =~ /^([A-Za-z][\_\-A-Za-z0-9]*)$/)
-  {
+  unless( $repositoryName =~ /^([A-Za-z][\_\-A-Za-z0-9]*)$/ ) {
     return $self->localise('GIT_ERROR_NAME_HAS_INVALID_CHARS',
                            {repositoryName => $repositoryName});
   }
@@ -690,6 +678,7 @@ sub git_repository_print_groups_and_users {
   if( $groups ) {
     $print_groups =  "<b>" . join("<br/>", split(FS, $groups)) . "</b><br/>";
   }
+  
   my $print_users = "";
   if( $users ) {
     $print_users =  join("<br/>", split(FS, $users));
@@ -707,11 +696,9 @@ sub git_repository_validate_name_does_not_exist
   my( $self, $repositoryName ) = @_;
   my $repository = $git_db->get( $repositoryName );
 
-  if (defined $repository)
-  {
+  if( defined $repository) {
     my $type = $repository->prop('type');
-    if( $type eq "repository" )
-    {
+    if( $type eq "repository" ) {
       return $self->localise( 'GIT_ERROR_ALREADY_EXISTS', { repositoryName => $repositoryName } );
     }
   }
