@@ -253,7 +253,8 @@ sub print_privileges {
 
 sub git_repository_print_save_or_add_button {
   my ($self) = @_;
-  if ($self->cgi->param("action") eq "modify") {
+  my $action = $self->cgi->param("action") || '';
+  if( $action eq "modify" ) {
     $self->print_button("SAVE");
   } else {
     $self->print_button("ADD");
@@ -380,7 +381,8 @@ sub git_repository_user_list
 sub git_repository_handle_create_or_modify {
   my ($self) = @_;
 
-  if ($self->cgi->param("action") eq "create") {
+  my $action = $self->cgi->param("action") || '';
+  if( $action eq "create") {
     $self->git_repository_handle_create();
   } else {
     $self->git_respository_handle_modify();
