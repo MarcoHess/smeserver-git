@@ -385,7 +385,7 @@ sub git_repository_handle_create_or_modify {
   } else {
     $self->git_respository_handle_modify();
   }
-}8
+}
 
 #----------------------------------------------------------------------
 # git_repository_handle_create()
