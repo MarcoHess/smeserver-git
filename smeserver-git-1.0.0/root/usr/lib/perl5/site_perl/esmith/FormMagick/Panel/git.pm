@@ -341,30 +341,41 @@ sub git_repository_print_name_field {
 #----------------------------------------------------------------------
 # git_repository_group_list()
 # Returns a hash of groups for the Create/Modify screen's group 
-# field's drop down list.
+# field's drop down list. It includes the special groups 'admin' 
+# for administrators and 'shared' for everybody on the local system. 
 
 sub git_repository_group_list
 {
+  my $self = shift;
   my @groups = $account_db->groups();
-  my %groups = ();
+  
+  my %groups = ( admin  => $self->localise('GIT_GROUP_ADMINISTRATORS') ." (admin)", 
+                 shared => $self->localise('GIT_GROUP_EVERYBODY') ." (shared)" );
+                 
   foreach my $g (@groups) {
-    $groups{$g->key()} = $g->prop('Description')." (".$g->key.")";
+    $groups{ $g->key() } = $g->prop('Description')." (".$g->key.")";
   }
+  
   return \%groups;
 }
 
 #----------------------------------------------------------------------
 # git_repository_user_list()
 # Returns a hash of users for the Create/Modify screen's user field's
-# drop down list.
+# drop down list, It explicitly adds the special user 'admin' as this 
+# user is not listed in the accounds database.
 
 sub git_repository_user_list
 {
+  my $self = shift;
   my @users = $account_db->users();
-  my %users = ();
+  
+  my %users = ( admin => $self->localise('GIT_USER_ADMINISTRATOR') ." (admin)" );
+  
   foreach my $u (@users) {
-    $users{$u->key()} = $u->prop('LastName').", ". $u->prop('FirstName')." (". $u->key.")";
+    $users{ $u->key() } = $u->prop('LastName').", ". $u->prop('FirstName')." (". $u->key.")";
   }
+
   return \%users;
 }
 
