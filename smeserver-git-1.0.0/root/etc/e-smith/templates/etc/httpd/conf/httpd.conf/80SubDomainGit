@@ -43,15 +43,15 @@
     die "Couldn't open ConfigDB\n";
 
   my $status = $git{'status'} || "disabled";
-  return "    # git is disabled.\n\nuse 'config setprop git status enabled' to enable HTTP access for git on your server.\n"
+  return "    # git is disabled.\nuse 'config setprop git status enabled' to enable HTTP access for git on your server.\n"
     unless $status eq 'enabled';
 
   my $domain = $git{'domain'} || "disabled";
   return "    # no domain for git defined!\nuse 'config setprop git domain git.yourdomain.com' to set a domain name for your server.\n"
     if $domain eq 'disabled';
 
-  my $access = $git{'allow_access_from'} || "disabled";
-  return "    # no allow_access_from setting for git defined!\nuse 'config setprop git allow_access_from [local|internet]' to set network access level for gitweb.\n"
+  my $access = $git{'gitweb_access_from'} || "disabled";
+  return "    # no gitweb_access_from setting for git defined!\nuse 'config setprop git gitweb_access_from [local|internet]' to set network access level for gitweb.\n"
     if $access eq 'disabled';
 
   my $debugging         = $git{'debugging'}        || "disabled";
@@ -70,7 +70,7 @@
   # Setup access permissions for webgit viewing  
   my $gitweb_allow = '127.0.0.1'; # Catch incorrect values, including empty ones
   # Setup the rules from which address range we allow access
-  if ($git{'allow_access_from'}) {
+  if( $git{'gitweb_access_from'} ) {
     if ($git{'allow_access_from'} eq 'internet') {
       $gitweb_allow = 'All';
     } elsif ($git{'allow_access_from'} eq 'local') {
@@ -101,7 +101,7 @@
     $OUT .= "\n";
   }
 
-  $OUT .= "  # Force all clients use HTTPS\n";
+  $OUT .= "  # Force all clients to use HTTPS\n";
   $OUT .= "  RewriteEngine on\n";
   $OUT .= "  RewriteCond   %{HTTPS} !=on\n";
   $OUT .= "  RewriteRule   .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]\n\n";
@@ -133,20 +133,12 @@
   $OUT .= "  AddExternalAuth       pwauth /usr/lib/httpd/modules/pwauth\n";
   $OUT .= "  SetExternalAuthMethod pwauth pipe\n\n";
 
-  $OUT .= "  # Load configuration for Gitweb\n";
-  $OUT .= "  SetEnv GITWEB_CONFIG /etc/gitweb.conf\n\n";
-  
+  $OUT .= "  # ~~~ GIT HTTP BACKEND ~~~\n\n";
   $OUT .= "  # Configure Git HTTP Backend\n";
   $OUT .= "  SetEnv GIT_PROJECT_ROOT $GitRepositoryRoot\n";
   $OUT .= "  SetEnv GIT_HTTP_EXPORT_ALL\n";
   $OUT .= "  SetEnv REMOTE_USER REDIRECT_REMOTE_USER\n\n"; 
-
-  $OUT .= "  # If HTTP:Authorization was send in the request, ensure we make it\n";
-  $OUT .= "  # available in the HTTP_AUTHORIZATION environment variable for use by gitweb.\n";
-  $OUT .= "  RewriteEngine on\n";
-  $OUT .= "  RewriteCond %\{HTTP:Authorization\} ^(.+)\n";
-  $OUT .= "  RewriteRule .? - [e=HTTP_AUTHORIZATION:%1]\n\n";
-  
+ 
   $OUT .= "  # For access to git-receive-pack items (i.e. Git PUSH operations) rewrite the\n";
   $OUT .= "  # URL to an internal virtual push directory that can be handled in a separate\n";
   $OUT .= "  # Location directive where we handle the PUSH authorisation separately from the\n";
@@ -158,8 +150,8 @@
 
   $OUT .= "  # We use ScriptAliasMatch to match those URLs \n";
   $OUT .= "  # that git-http-backend can handle, and forward the rest to gitweb\n";
-  $OUT .= "  # In this first one we catch the push virtual directory and pass the URL without the\n";
-  $OUT .= "  # /push/ to git-http-backend\n";
+  $OUT .= "  # In this first one we catch the PUSH virtual directory and pass the URL \n";
+  $OUT .= "  # without the /push/ to git-http-backend\n";
   $OUT .= "  ScriptAliasMatch \\\n";
   $OUT .= "            \"\(\?x\)\^\/push\/\(\.\*/(HEAD \| \\\n";
   $OUT .= "                        info/refs \| \\\n";
@@ -180,7 +172,17 @@
   $OUT .= "                        git-\(upload\|receive\)-pack\)\)\$\" \\\n";
   $OUT .= "            /usr/libexec/git-core/git-http-backend/\$1\n";
   $OUT .= "\n";
+
+  $OUT .= "  # ~~~ GITWEB ~~~\n\n";
+  $OUT .= "  # Load configuration for Gitweb\n";
+  $OUT .= "  SetEnv GITWEB_CONFIG /etc/gitweb.conf\n\n";
   
+  $OUT .= "  # If HTTP:Authorization was send in the request, ensure we make it\n";
+  $OUT .= "  # available in the HTTP_AUTHORIZATION environment variable for use by gitweb.\n";
+  $OUT .= "  RewriteEngine on\n";
+  $OUT .= "  RewriteCond %\{HTTP:Authorization\} ^(.+)\n";
+  $OUT .= "  RewriteRule .? - [e=HTTP_AUTHORIZATION:%1]\n\n";
+
   $OUT .= "  # Serve HTML with gitweb. Use Alias to allow serving required CSS and JS files.\n";
   $OUT .= "  Alias  /gitweb              /usr/share/gitweb\n\n";
   $OUT .= "  Alias  /static/gitweb.css   /etc/e-smith/web/common/gitweb/gitweb.css\n";
@@ -237,8 +239,8 @@
     # Retrieve the access rules for the repository
     my $satisfy                 = 'All';
     my $allow_from_network = '127.0.0.1'; # Catch incorrect values, including empty ones
-    if ($properties{'allow_access_from'}) {
-      if ($properties{'allow_access_from'} eq 'internet') {
+    if( $properties{'allow_access_from'} ) {
+      if( $properties{'allow_access_from'} eq 'internet' ) {
         $allow_from_network = 'All';
       } elsif ($properties{'allow_access_from'} eq 'local') {
         $allow_from_network = $localAccess;
