@@ -53,8 +53,8 @@ __DATA__
 
     <!-- page 1 -->
   <page name="GitCreateModify" 
-	  pre-event="turn_off_buttons()" 
-	  post-event="git_repository_handle_create_or_modify()">
+    pre-event="turn_off_buttons()" 
+    post-event="git_repository_handle_create_or_modify()">
    
     <subroutine src="git_repository_print_name_field()" />
     

@@ -34,7 +34,7 @@
   # This section will configure a virtual host with the necessary directory settings to
   # enable the webserver to manage the configured repositories
   
-  use esmith::ConfigDB;      # General semserver-git configuration
+  use esmith::ConfigDB;      # General smeserver-git configuration
   use esmith::NetworksDB;    # Get the network IP address configuration
   use esmith::AccountsDB;    # Collect users that are members of a group
   use esmith::GitDB;         # Contains all git repositories configuration data
@@ -43,15 +43,15 @@
     die "Couldn't open ConfigDB\n";
 
   my $status = $git{'status'} || "disabled";
-  return "    # git-status is disabled.\n"
+  return "    # git is disabled.\n\nuse 'config setprop git status enabled' to enable HTTP access for git on your server.\n"
     unless $status eq 'enabled';
 
   my $domain = $git{'domain'} || "disabled";
-  return "    # no hostname or domain for git defined\n"
+  return "    # no domain for git defined!\nuse 'config setprop git domain git.yourdomain.com' to set a domain name for your server.\n"
     if $domain eq 'disabled';
 
   my $access = $git{'allow_access_from'} || "disabled";
-  return "    # no network access setting for git defined\n"
+  return "    # no allow_access_from setting for git defined!\nuse 'config setprop git allow_access_from [local|internet]' to set network access level for gitweb.\n"
     if $access eq 'disabled';
 
   my $debugging         = $git{'debugging'}        || "disabled";
@@ -312,6 +312,6 @@
     }
 
     $OUT .= "\n  </Location> # /push/$git_repository.git\n\n";
-    }
+  }
   $OUT .= "</VirtualHost>\n\n";
 }

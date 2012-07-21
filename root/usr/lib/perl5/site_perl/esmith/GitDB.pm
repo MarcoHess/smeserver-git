@@ -77,7 +77,7 @@ sub AUTOLOAD {
   my $self = shift;
   my ($called_sub_name) = ($AUTOLOAD =~ m/([^:]*)$/);
   my @types = qw( repositories );
-  if (grep /^$called_sub_name$/, @types) {
+  if( grep /^$called_sub_name$/, @types ) {
     $called_sub_name =~ s/s$//g;    # de-pluralize
     return $self->get_all_by_prop(type => qw( repository ));
   }
@@ -100,14 +100,20 @@ sub effective_users_list_from {
     }
     my $accounts_db = esmith::AccountsDB->open;
     foreach my $group (@groups) {
-      my $record = $accounts_db->get($group);
-      if ($record) {
-        my $members = $record->prop('Members') || "";
-        if (length($members) > 0) {
-          push @effective_users_list, split (/,/, $members);
+      if( $group eq 'admin' ) {
+        push @effective_users_list, 'admin';
+      } elsif( $group eq 'shared' ) {
+        push @effective_users_list, $_->key foreach( $accounts_db->users );
+      } else {
+        my $record = $accounts_db->get($group);
+        if ($record) {
+          my $members = $record->prop('Members') || "";
+          if (length($members) > 0) {
+            push @effective_users_list, split (/,/, $members);
+          }
         }
+        undef $record;
       }
-      undef $record;
     }
   }
     
