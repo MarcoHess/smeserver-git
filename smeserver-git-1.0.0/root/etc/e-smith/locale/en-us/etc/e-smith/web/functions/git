@@ -38,7 +38,7 @@
       <![CDATA[ 
         <p>The table below lists the currently configured Git repositories on this server.</p>
         <p>The <b>bold</b> entries in the <b>Pull Access</b> and <b>Push Access</b> columns correspond to the 
-        user groups on this server. Non-bold entries are individual users.</p>
+        user groups on this server. Non-bold entries are individual users. <i>Anonymous</i> means there is no access control in effect.</p>
         <p>You can modify the settings of a Git repository or remove a Git repository by clicking on the corresponding command in the <b>Action</b> column.</p>
       ]]>
     </trans>
@@ -136,7 +136,7 @@ characters.</trans>
     <base>GIT_PRIVILEGES_NOTE</base>
     <trans>
       <![CDATA[ <p> Use the selection boxes below to you configure the pull and push permissions for the Git repository.<br />
-      Select either groups or individual users. Press the SHIFT key to select multiple groups or users.<br />
+      Select either groups or individual users. Press the SHIFT and/or the CTRL key to select multiple groups or users.<br />
       If you set <b>neither</b> a group or user setting, the repositoty will be accessible <b>anonymously</b>! (i.e. no user name or password will be required).<br />
       If you specify users or groups for pull permissions, the push users will also have pull access.<br />
       If you want your user(s) or group(s) to have exclusive full pull and push access, specify them in <b>both</b> the pull and push box.<br />
