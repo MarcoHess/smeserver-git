@@ -27,11 +27,15 @@ installes and enables a virtual server 'git' on the current host like in
 git.host.com. Repositories are then available as https://git.host.com/gitrepo.git.
 
 %changelog
-* Thu Jul 19 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
+* Sat Jul 21 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
 - Ensure git database is present in /home/e-smith/db
 - Create default config database entries for 'git'
 - Moved retrieving maxNameLength for panel validations from config 'git'
-
+- In the user and group list boxes, added support to the special group admin
+  and shared to allow either the admin or everybody to be included in the access lists.
+- Updated the HTTP config db error messages to be more clear as to which property needs
+  to be configured.  
+  
 * Sun Jun 17 2012 Jonathan Martens <smeserver-contribs@snetram.nl> 1.0.0-2
 - Rip out gitweb and create tgz file
 
