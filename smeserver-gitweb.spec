@@ -1,6 +1,6 @@
 %define name smeserver-gitweb
 %define version 1.0.0
-%define release 2
+%define release 3
 Summary: smeserver-git provides integration for centralised git respositories on an smeserver
 Name: %{name}
 Version: %{version}
@@ -9,19 +9,25 @@ Distribution: SME Server
 License: GNU GPL version 2
 URL: http://www.through-ip.com
 Group: SMEserver/addon
-Source: smeserver-gitweb-1.0.0.tar.gz
+Source: smeserver-gitweb-%{version}.tar.gz
 Packager: Marco Hess <marco.hess@through-ip.com>
 BuildArchitectures: noarch
 BuildRoot: /var/tmp/%{name}-%{version}
 BuildRequires: e-smith-devtools
-Requires: smeserver-git gitweb
 Requires: e-smith-release >= 8.0
+Requires: smeserver-git
+Requires: gitweb
 AutoReqProv: no
 
 %description
 HTTP access to https://git.host.com provides a gitweb view of the repositories.
 
 %changelog
+* Mon Jul 23 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
+- Setup default config parameters for gitweb as a service
+- Removed HTTP template as this is shared with smeserver-git
+- Added require on gitweb rpm
+
 * Sun Jun 17 2012 Jonathan Martens <smeserver-contribs@snetram.nl> 1.0.0-2
 - Remove all smeserver-git related files in order to split the packages
 
