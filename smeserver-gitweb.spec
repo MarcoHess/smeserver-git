@@ -17,6 +17,7 @@ BuildRequires: e-smith-devtools
 Requires: e-smith-release >= 8.0
 Requires: smeserver-git
 Requires: gitweb
+Requires: highlight
 AutoReqProv: no
 
 %description
