@@ -9,7 +9,7 @@ Distribution: SME Server
 License: GNU GPL version 2
 URL: http://www.through-ip.com
 Group: SMEserver/addon
-Source: smeserver-git-1.0.0.tar.gz
+Source: smeserver-git-%{version}.tar.gz
 Packager: Marco Hess <marco.hess@through-ip.com>
 BuildArchitectures: noarch
 BuildRoot: /var/tmp/%{name}-%{version}
