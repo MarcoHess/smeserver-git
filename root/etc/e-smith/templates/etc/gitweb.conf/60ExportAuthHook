@@ -53,6 +53,7 @@ $export_auth_hook = sub \{
     \}
 
     # Check the configured access permissions for pull access
+    # We will allow gitweb viewing when the repository has Anonymous pull access
     if( ($properties\{'pull_groups'\} eq '') && ($properties\{'pull_users'\} eq '') ) \{
       $anonymous_pull = 1;
     \}
@@ -61,16 +62,24 @@ $export_auth_hook = sub \{
     # a) a user that is listed in the repository pull or push permissions
     # b) valid credentials i.e password can be validated.
     if( $ENV\{'HTTP_AUTHORIZATION'\} ) \{
+      # Split the authorisation information in a user name and password
       my @http_authorisation = split(/ /, $ENV\{'HTTP_AUTHORIZATION'\} );
       my @http_digest = split( /:/, decode_base64( @http_authorisation[1] ) );
+      
+      # user nobody is only a hack to allow us to generate an error and force
+      # the browser to prompt again for a user name and password
       if( @http_digest[0] = 'nobody' ) \{
+        #
         #die "User '@http_digest[0]' Password '@http_digest[1]' @network_setting[0]-@network_setting[1]-@network_setting[2] \n";
+      \} else \{
+        # validate the user is in the list of pull or push permissions.
+        # validate the provided password for that user.
+      
       \}
     \}
-
   \}
 
-  # local host are allowed to see all repositories
+  # users on the local network are allowed to see all repositories
   if( $host_is_local ) \{
      $repository_view_allowed = 1;
   \} elsif( $internet_access_allowed && $anonymous_pull ) \{
