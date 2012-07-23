@@ -1,7 +1,7 @@
-%define name smeserver-gitweb
+%define name smeserver-gitweb-theme
 %define version 1.0.0
 %define release 3
-Summary: smeserver-git provides integration for centralised git respositories on an smeserver
+Summary: smeserver-gitweb-theme provides a more GitHub look and feel for gitweb on an smeserver
 Name: %{name}
 Version: %{version}
 Release: %{release}%{?dist}
@@ -15,23 +15,14 @@ BuildArchitectures: noarch
 BuildRoot: /var/tmp/%{name}-%{version}
 BuildRequires: e-smith-devtools
 Requires: e-smith-release >= 8.0
-Requires: smeserver-git
-Requires: gitweb
+Requires: smeserver-gitweb
 AutoReqProv: no
 
 %description
-HTTP access to https://git.host.com provides a gitweb view of the repositories.
+GitHUB inspired theme for the gitweb viewer on SME Server.
 
 %changelog
 * Mon Jul 23 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
-- Setup default config parameters for gitweb as a service
-- Removed HTTP template as this is shared with smeserver-git
-- Added require on gitweb rpm
-
-* Sun Jun 17 2012 Jonathan Martens <smeserver-contribs@snetram.nl> 1.0.0-2
-- Remove all smeserver-git related files in order to split the packages
-
-* Sun Apr 29 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-1
 - initial release
 
 %prep
