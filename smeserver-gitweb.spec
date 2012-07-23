@@ -14,7 +14,7 @@ Packager: Marco Hess <marco.hess@through-ip.com>
 BuildArchitectures: noarch
 BuildRoot: /var/tmp/%{name}-%{version}
 BuildRequires: e-smith-devtools
-Requires: smeserver-git
+Requires: smeserver-git gitweb
 Requires: e-smith-release >= 8.0
 AutoReqProv: no
 
