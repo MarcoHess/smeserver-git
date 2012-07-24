@@ -15,6 +15,8 @@
   #   1. `git-http-backend`, <http://www.kernel.org/pub/software/scm/git/docs/git-http-backend.html>
   #   2. `gitweb`, <http://repo.or.cz/w/alt-git.git?a=blob_plain;f=gitweb/README>
   #
+  # A lot of inspriration came from <https://git.jim.sh/jim/git-server-config.git>
+  #
   # Also see Scott Chacon's "Smart HTTP Transport", <http://progit.org/2010/03/04/smart-http.html>
   #
   # Access Rules:
