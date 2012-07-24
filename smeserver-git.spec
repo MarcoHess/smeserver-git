@@ -1,7 +1,7 @@
 %define name smeserver-git
 %define version 1.0.0
 %define release 3
-Summary: smeserver-git provides integration for centralised git respositories on an smeserver
+Summary: HTTPS access to centralised Git repositories on SME Server.
 Name: %{name}
 Version: %{version}
 Release: %{release}%{?dist}
