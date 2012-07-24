@@ -33,11 +33,17 @@
   #
   # This section will configure a virtual host with the necessary directory settings to
   # enable the webserver to manage the configured repositories
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~ Libraries
   
   use esmith::ConfigDB;      # General smeserver-git configuration
   use esmith::NetworksDB;    # Get the network IP address configuration
   use esmith::AccountsDB;    # Collect users that are members of a group
   use esmith::GitDB;         # Contains all git repositories configuration data
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~ Minimal Base Configuration Requirements
 
   my $config_db = esmith::ConfigDB->open_ro() or
     die "Couldn't open ConfigDB\n";
@@ -54,10 +60,9 @@
   return "    # no gitweb_access_from setting for git defined!\nuse 'config setprop git gitweb_access_from [local|internet]' to set network access level for gitweb.\n"
     if $access eq 'disabled';
 
-  my $debugging         = $git{'debugging'}        || "disabled";
-  my $user_repositories = $git{'UserRepositories'} || "disabled";
-    
-  # Open additional databases for configuring individual repositories  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~ Open additional databases for configuring individual repositories  
+  
   my $networks_db = esmith::NetworksDB->open_ro() or
     die "Couldn't open NetworksDB\n";
     
@@ -66,8 +71,18 @@
   
   my $git_db = esmith::GitDB->open_ro() or
     die "Couldn't open GitDB\n";
+    
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~ Option Configuration
 
-  # Setup access permissions for webgit viewing  
+  my $debugging         = $git{'debugging'}        || "disabled";
+  my $user_repositories = $git{'UserRepositories'} || "disabled";
+  my $gitweb            = $git{'GitWeb'}           || "disabled";
+  my $gitweb_theme      = $git{'GitWebTheme'}      || "disabled";
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~ Gitweb default access permissions for viewing
+  
   my $gitweb_allow = '127.0.0.1'; # Catch incorrect values, including empty ones
   # Setup the rules from which address range we allow access
   if( $git{'gitweb_access_from'} ) {
@@ -77,13 +92,12 @@
       $gitweb_allow = $localAccess;
     } 
   }
-    
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~ Default installation locations
+  
   my $GitWebRoot        = "/usr/share/gitweb";
   my $GitRepositoryRoot = "/home/e-smith/files/git";
-
-  $OUT  = "";
-  $OUT .= "# " . $networks_db->local_access_spec('private') .  "\n";
-  $OUT .= "# " . $networks_db->local_access_spec('public') .  "\n";
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
   #~~~ Automatically redirect everything to the HTTPS domain
@@ -173,48 +187,6 @@
   $OUT .= "            /usr/libexec/git-core/git-http-backend/\$1\n";
   $OUT .= "\n";
 
-  $OUT .= "  # ~~~ GITWEB ~~~\n\n";
-  $OUT .= "  # Load configuration for Gitweb\n";
-  $OUT .= "  SetEnv GITWEB_CONFIG /etc/gitweb.conf\n\n";
-  
-  $OUT .= "  # If HTTP:Authorization was send in the request, ensure we make it\n";
-  $OUT .= "  # available in the HTTP_AUTHORIZATION environment variable for use by gitweb.\n";
-  $OUT .= "  RewriteEngine on\n";
-  $OUT .= "  RewriteCond %\{HTTP:Authorization\} ^(.+)\n";
-  $OUT .= "  RewriteRule .? - [e=HTTP_AUTHORIZATION:%1]\n\n";
-
-  $OUT .= "  # Serve HTML with gitweb. Use Alias to allow serving required CSS and JS files.\n";
-  $OUT .= "  Alias  /gitweb              /usr/share/gitweb\n\n";
-  $OUT .= "  Alias  /static/gitweb.css   /etc/e-smith/web/common/gitweb/gitweb.css\n";
-  $OUT .= "  Alias  /static/gitweb.js    /etc/e-smith/web/common/gitweb/gitweb.js\n";
-
-#  $OUT .= "  # Ensure we can browse the repo with http://git.server.com/repo.git\n";
-#  $OUT .= "  # instead of http://git.server.com/?p=repo.git;a=summary.\n";
-#  $OUT .= "  RewriteEngine on\n";
-#  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-f\n";
-#  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-d\n";
-#  $OUT .= "  RewriteRule ^/\$ /gitweb/gitweb.cgi [PT]\n\n";
-
-#  $OUT .= "  RewriteCond %{REQUEST_URI} !=/gitweb.*\n";
-#  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-f\n";
-#  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-d\n";
-#  $OUT .= "  RewriteRule ^/(.*\\.git/(?!/?(HEAD|info|objects|refs)).*)?\$ /gitweb/gitweb.cgi%{REQUEST_URI} [L,PT]\n\n";
-  
-  $OUT .= "  <Directory $GitWebRoot>\n";
-  $OUT .= "    Options        ExecCGI\n";
-  $OUT .= "    AllowOverride  None\n";
-  $OUT .= "    AddHandler     cgi-script .cgi\n";
-  $OUT .= "    DirectoryIndex gitweb.cgi\n";
-  $OUT .= "    Order          Allow,Deny\n";
-  $OUT .= "    Allow from     $gitweb_allow\n";
-  $OUT .= "  </Directory>\n\n";
-
-  $OUT .= "  <Directory /etc/e-smith/web/common/gitweb>\n";
-  $OUT .= "    AllowOverride  None\n";
-  $OUT .= "    Order          Allow,Deny\n";
-  $OUT .= "    Allow from     $gitweb_allow\n";
-  $OUT .= "  </Directory>\n\n";
-
   $OUT .= "  <Directory $GitRepositoryRoot>\n";
   $OUT .= "    Options        ExecCGI\n";
   $OUT .= "    Order          Allow,Deny\n";
@@ -226,6 +198,58 @@
   $OUT .= "    Order          Allow,Deny\n";
   $OUT .= "    Allow from     All\n";
   $OUT .= "  </Directory>\n\n";
+  
+  $OUT .= "  # ~~~ GITWEB ~~~\n\n";
+  if( $gitweb eq 'enabled' ) {
+    $OUT .= "  # Load configuration for Gitweb\n";
+    $OUT .= "  SetEnv GITWEB_CONFIG /etc/gitweb.conf\n\n";
+    
+    $OUT .= "  # If HTTP:Authorization was send in the request, ensure we make it\n";
+    $OUT .= "  # available in the HTTP_AUTHORIZATION environment variable for use by gitweb.\n";
+    $OUT .= "  RewriteEngine on\n";
+    $OUT .= "  RewriteCond %\{HTTP:Authorization\} ^(.+)\n";
+    $OUT .= "  RewriteRule .? - [e=HTTP_AUTHORIZATION:%1]\n\n";
+
+    $OUT .= "  # Serve HTML with gitweb. Use Alias to allow serving required CSS and JS files.\n";
+    $OUT .= "  Alias  /gitweb              /usr/share/gitweb\n";
+    if( $gitweb_theme eq 'enabled' ) {
+      $OUT .= "  # gitweb-theme enabled:\n";
+      $OUT .= "  Alias  /static/gitweb.css   /etc/e-smith/web/common/gitweb/gitweb.css\n";
+      $OUT .= "  Alias  /static/gitweb.js    /etc/e-smith/web/common/gitweb/gitweb.js\n";
+    } else {
+      $OUT .= "  # default gitweb theme\n";
+    }
+    $OUT .= "\n";
+
+  #  $OUT .= "  # Ensure we can browse the repo with http://git.server.com/repo.git\n";
+  #  $OUT .= "  # instead of http://git.server.com/?p=repo.git;a=summary.\n";
+  #  $OUT .= "  RewriteEngine on\n";
+  #  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-f\n";
+  #  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-d\n";
+  #  $OUT .= "  RewriteRule ^/\$ /gitweb/gitweb.cgi [PT]\n\n";
+
+  #  $OUT .= "  RewriteCond %{REQUEST_URI} !=/gitweb.*\n";
+  #  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-f\n";
+  #  $OUT .= "  RewriteCond %{REQUEST_FILENAME} !-d\n";
+  #  $OUT .= "  RewriteRule ^/(.*\\.git/(?!/?(HEAD|info|objects|refs)).*)?\$ /gitweb/gitweb.cgi%{REQUEST_URI} [L,PT]\n\n";
+    
+    $OUT .= "  <Directory $GitWebRoot>\n";
+    $OUT .= "    Options        ExecCGI\n";
+    $OUT .= "    AllowOverride  None\n";
+    $OUT .= "    AddHandler     cgi-script .cgi\n";
+    $OUT .= "    DirectoryIndex gitweb.cgi\n";
+    $OUT .= "    Order          Allow,Deny\n";
+    $OUT .= "    Allow from     $gitweb_allow\n";
+    $OUT .= "  </Directory>\n\n";
+
+    $OUT .= "  <Directory /etc/e-smith/web/common/gitweb>\n";
+    $OUT .= "    AllowOverride  None\n";
+    $OUT .= "    Order          Allow,Deny\n";
+    $OUT .= "    Allow from     $gitweb_allow\n";
+    $OUT .= "  </Directory>\n\n";
+  } else {
+    $OUT .= "  # Gitweb disabled or not installed\n";
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
   #~~~ Setup access for individual Git repositories
@@ -236,7 +260,7 @@
     my $git_repository          = $repository->key;
     my %properties              = $repository->props;
     
-    # Retrieve the access rules for the repository
+    # Retrieve the network access rules for the repository
     my $satisfy                 = 'All';
     my $allow_from_network = '127.0.0.1'; # Catch incorrect values, including empty ones
     if( $properties{'allow_access_from'} ) {
@@ -266,6 +290,9 @@
     $OUT .= "  #  - Effective PUSH Users: '" . ($effective_push_users || "Anonymous") . "' <= (" . ($properties{'push_groups'} || "none") . "/" . ($properties{'push_users'}  || "none") . ")\n";
     $OUT .= "  #  - Effective PULL/PUSH : '" . ($effective_pull_push_users || "Anonymous") . "'\n";
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+    #~~~ PULL Access Setup
+    
     $OUT .= "  <Location \"/$git_repository.git\"> # for PULL access to $git_repository.git\n\n";
     $OUT .= "    SSLRequireSSL\n\n";
 
@@ -278,18 +305,23 @@
     } else {
       $OUT .= "    # Anoymous Pull Access\n";
     }
-    
+    $OUT .= "\n";
     if( $allow_from_network ne 'All' ) { 
-      $OUT .= "\n    # Restricted network access\n";
+      $OUT .= "    # Restricted network access\n";
       $OUT .= "    Order         Deny,Allow\n";
       $OUT .= "    Deny          from All\n";
       $OUT .= "    Allow         from $allow_from_network\n";
       $OUT .= "    Satisfy       All\n";
     } else {
-      $OUT .= "\n    # Internet access\n";
+      $OUT .= "    # Internet access\n";
     }
     $OUT .= "\n  </Location> # $git_repository.git\n\n";
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+    #~~~ PUSH Access Setup - uses a virtual /push directory in the path that was 
+    #                        setup using previus RewriteCond rules looking for the 
+    #                        git-receive-pack items that Git requests when pushing.
+    
     $OUT .= "  <Location \"/push/$git_repository.git\">  # for PUSH access to $git_repository.git\n\n";
     $OUT .= "    SSLRequireSSL\n\n";
 
@@ -302,17 +334,16 @@
     } else {
       $OUT .= "    # Anoymous PUSH Access\n";
     }
-    
+    $OUT .= "\n";
     if( $allow_from_network ne 'All' ) { 
-      $OUT .= "\n    # Restricted network access\n";
+      $OUT .= "    # Restricted network access\n";
       $OUT .= "    Order         Deny,Allow\n";
       $OUT .= "    Deny          from All\n";
       $OUT .= "    Allow         from $allow_from_network\n";
       $OUT .= "    Satisfy       All\n";
     } else {
-      $OUT .= "\n    # Internet access\n";
+      $OUT .= "    # Internet access\n";
     }
-
     $OUT .= "\n  </Location> # /push/$git_repository.git\n\n";
   }
   $OUT .= "</VirtualHost>\n\n";
