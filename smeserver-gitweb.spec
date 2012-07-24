@@ -1,7 +1,7 @@
 %define name smeserver-gitweb
 %define version 1.0.0
 %define release 3
-Summary: smeserver-git provides integration for centralised git respositories on an smeserver
+Summary: Web viewing of Git repositories on SME Server
 Name: %{name}
 Version: %{version}
 Release: %{release}%{?dist}
