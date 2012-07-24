@@ -1,7 +1,7 @@
 %define name smeserver-gitweb-theme
 %define version 1.0.0
 %define release 3
-Summary: smeserver-gitweb-theme provides a more GitHub look and feel for gitweb on an smeserver
+Summary: GitHub inspired look and feel for smeserver-gitweb
 Name: %{name}
 Version: %{version}
 Release: %{release}%{?dist}
@@ -19,7 +19,8 @@ Requires: smeserver-gitweb
 AutoReqProv: no
 
 %description
-GitHUB inspired theme for the gitweb viewer on SME Server.
+Optional package for use with smeserver-gitweb to enable a more GitHub inspired
+theme for gitweb. Based on http://kogakure.github.com/gitweb-theme/
 
 %changelog
 * Mon Jul 23 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
