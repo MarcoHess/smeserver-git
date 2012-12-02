@@ -8,7 +8,6 @@ for my $event (qw(
   git-delete
   ))
 {
-  event_link("git-delete-user-or-group-from-access-list", $event, "05");
   safe_symlink("sigusr1", "root/etc/e-smith/events/$event/services2adjust/httpd-e-smith");
   templates2events("/etc/httpd/conf/httpd.conf", $event)
 }
@@ -17,7 +16,6 @@ for my $event (qw( git-repository-create
                    git-repository-modify ))
 {
   event_link("git-repository-create-modify", $event, "05");
-  event_link("git-delete-user-or-group-from-access-list", $event, "05");
   safe_symlink("sigusr1", "root/etc/e-smith/events/$event/services2adjust/httpd-e-smith");
   templates2events("/etc/httpd/conf/httpd.conf", $event)
 }
