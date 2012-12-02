@@ -1,11 +1,13 @@
 #!/usr/bin/perl -wT
-
 # vim: ft=perl ts=2 sw=2 et:
+
 #----------------------------------------------------------------------
 # heading     : Collaboration
 # description : GIT_NAVIGATION_DESCRIPTION
 # navigation  : 2499 2599
-#
+#----------------------------------------------------------------------
+
+#----------------------------------------------------------------------
 # Copyright (C) 2012 - Marco Hess <marco.hess@through-ip.com>
 #
 # This file is part of the "Git Repositories" panel in the
@@ -51,7 +53,7 @@ __DATA__
     <subroutine src="git_repository_print_table()" />
   </page>
 
-    <!-- page 1 -->
+  <!-- page 1 -->
   <page name="GitCreateModify" 
     pre-event="turn_off_buttons()" 
     post-event="git_repository_handle_create_or_modify()">
