@@ -49,7 +49,7 @@ if ($event eq 'user-delete') {
   # Setup to scan for groups
   @entries = qw(GroupsWrite GroupsRead);
 } else {
-  die "Invalid event: \"$event\".";
+  die "Invalid event: \"$event\" for \"$item\" .";
 }
 
 use esmith::GitDB;
