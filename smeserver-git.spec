@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 3
+%define release 11
 Summary: HTTPS access to centralised Git repositories on SME Server.
 Name: %{name}
 Version: %{version}
@@ -23,8 +23,8 @@ smeserver-git enables centralised git repositories on an SME server and enables
 access to these repositories through HTTP/HTTPS. Repositories are created and
 managed through a server-manager panel that also configures the access permissions
 to the repositories based on the existing SME users and groups. The package
-installes and enables a virtual server 'git' on the current host like in
-git.host.com. Repositories are then available as https://git.host.com/gitrepo.git.
+installes and enables the git server on the current host like in
+host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
 * Sat Jul 21 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
@@ -45,18 +45,57 @@ git.host.com. Repositories are then available as https://git.host.com/gitrepo.gi
 %prep
 %setup
 mkdir -p root/home/e-smith/files/git/
+true
 
 %build
 perl createlinks
+true 
 
 %install
 rm -rf $RPM_BUILD_ROOT
 (cd root   ; find . -depth -print | cpio -dump $RPM_BUILD_ROOT)
 rm -f %{name}-%{version}-filelist
 /sbin/e-smith/genfilelist $RPM_BUILD_ROOT > %{name}-%{version}-filelist
+true
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+true
+
+%post
+
+echo "--------------------------------------------------------------------------------------------"
+
+echo "Setting up git repositories configuration database ..."
+touch /home/e-smith/files/git
+
+echo "Setting up git repositories root directory ..."
+mkdir -p /home/e-smith/files/git
+chown admin:www /home/e-smith/files/git
+chmod 770 /home/e-smith/files/git
+chmod g+s /home/e-smith/files/git
+
+echo "Rebuilding server-manager ..."
+/sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
+/etc/e-smith/events/actions/navigation-conf
+/etc/rc7.d/S86httpd-e-smith sighup
+
+echo "--------------------------------------------------------------------------------------------"
+
+%postun
+
+echo "--------------------------------------------------------------------------------------------"
+
+echo "smeserver-git has been removed but the git repositories and the git config database are left in place ..."
+echo "To remove the git repositories, use: 'rm -rf /home/e-smith/files/git'"
+echo "To remove the git config database, use: 'rm -rf /home/e-smith/db/git'"
+
+echo "--------------------------------------------------------------------------------------------"
+
+echo "Rebuilding server-manager ..."
+/sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
+/etc/e-smith/events/actions/navigation-conf
+/etc/rc7.d/S86httpd-e-smith sighup
 
 %files -f %{name}-%{version}-filelist
 %defattr(-,root,root)
