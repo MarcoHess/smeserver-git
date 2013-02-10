@@ -3,22 +3,70 @@
 use esmith::Build::CreateLinks qw(:all);
 use File::Basename;
 
-for my $event (qw(
-  git-modify
-  git-delete
-  ))
+# Overview of Events, Actions, Template & Services
+# ================================================
+
+# git-create
+# ----------
+
+# git-modify
+# ----------
+
+# git-delete
+# ----------
+
+# git-repository-create
+# ---------------------
+
+# git-repository-modify
+# ---------------------
+
+# git-repository-delete
+# ---------------------
+
+# user-delete
+# -----------
+
+# group-modify
+# ------------
+
+# group-delete
+# ------------
+
+# domain-modify
+# -------------
+# The domain/server name is used in the GitWeb view.
+
+# domain-delete
+# -------------
+# If a domain is deleted, we need to check if the deleted domain may have been the in use for Git.
+
+# Git Contrib Modified or Deleted
+# -------------------------------
+
+for my $event ( qw( git-modify
+                    git-delete ) )
 {
   safe_symlink("sigusr1", "root/etc/e-smith/events/$event/services2adjust/httpd-e-smith");
   templates2events("/etc/httpd/conf/httpd.conf", $event)
 }
 
-for my $event (qw( git-repository-create 
-                   git-repository-modify ))
+# Git Repository Create / Modify
+# ------------------------------
+# Repository setting created or updated. regenerate the httpd.conf file and signal the 
+# server restart.
+
+for my $event ( qw( git-repository-create 
+                    git-repository-modify ) )
 {
   event_link("git-repository-create-modify", $event, "05");
+  templates2events("/etc/httpd/conf/httpd.conf", $event);
   safe_symlink("sigusr1", "root/etc/e-smith/events/$event/services2adjust/httpd-e-smith");
-  templates2events("/etc/httpd/conf/httpd.conf", $event)
 }
+
+# Git Repository Delete
+# ---------------------
+# Perform the repository delete action and then regenerate the httpd.conf file.
 
 for my $event (qw( git-repository-delete ))
 {
@@ -27,21 +75,22 @@ for my $event (qw( git-repository-delete ))
   templates2events("/etc/httpd/conf/httpd.conf", $event)
 }
 
-for my $event (qw( user-delete 
-                   group-delete
-                   group-modify ))
+# User Delete / Group Delete / Group Modify
+# -----------------------------------------
+# For either Users or Groups being deleted or Groups being modified, we need  
+# to go through all the git repositiories and update the UserRead, UserWrite, 
+# GroupRead and GroupWrite entries. We then need to expand the httpd.conf
+# template to ensure that the expanded user names there are still the right 
+# ones and also we need to update the git repositories themselves to update
+# the mailing list for each repository.
+
+for my $event ( qw( user-delete 
+                    group-delete
+                    group-modify ) )
 {
   event_link("git-delete-user-or-group-from-access-list", $event, "05");
   safe_symlink("sigusr1", "root/etc/e-smith/events/$event/services2adjust/httpd-e-smith");
   templates2events("/etc/httpd/conf/httpd.conf", $event)
-}
-
-for my $event (qw(
-  git-project-delete
-  git-delete
-  ))
-{
-  event_link($event, $event, "05");
 }
 
 panel_link('git', 'manager');
