@@ -21,8 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-#----------------------------------------------------------------------
-# $Id: git-repository-create-modify 1 2012-04-23 11:25:58Z marco $
+#
 #----------------------------------------------------------------------
 
 package esmith;
@@ -36,32 +35,39 @@ use esmith::GitDB;
 
 $ENV{'PATH'} = "/bin";
 
-my $event = $ARGV [0];
+#----------------------------------------------------------------------
+
+my $event             = $ARGV [0];
 my $gitRepositoryName = $ARGV [1];
 
-die "gitRepositoryName argument missing" unless defined ($gitRepositoryName);
+die "gitRepositoryName argument missing" 
+  unless defined ($gitRepositoryName);
+
+#----------------------------------------------------------------------
 
 my $git_db = esmith::GitDB->open_ro();
+
 my $repository = $git_db->get($gitRepositoryName) or 
 	die "Couldn't find $gitRepositoryName record in git database\n";
-
+  
 die "'$gitRepositoryName' is not an Git repository; git-repository-modify event failed.\n"
   unless ($repository->prop('type') eq 'repository');
+
+#----------------------------------------------------------------------
   
 my %properties  = $repository->props;  
 my $description = $properties{'description'};  
 
-
-my $effective_pull_users = $git_db->effective_users_list_from( $properties{'pull_groups'},  
-                                                               $properties{'pull_users'} ); 
+my $effective_pull_users       = $git_db->effective_users_list_from( $properties{'pull_groups'},  
+                                                                     $properties{'pull_users'} ); 
                                                                
-my $effective_push_users = $git_db->effective_users_list_from( $properties{'push_groups'}, 
-                                                               $properties{'push_users'} ); 
+my $effective_push_users       = $git_db->effective_users_list_from( $properties{'push_groups'}, 
+                                                                     $properties{'push_users'} ); 
                                                                
 my $effective_pull_push_users  = $git_db->effective_users_list_from( $properties{'push_groups'}, 
-                                                               $properties{'push_users'}, 
-                                                               $properties{'pull_groups'},  
-                                                               $properties{'pull_users'} );
+                                                                     $properties{'push_users'}, 
+                                                                     $properties{'pull_groups'},  
+                                                                     $properties{'pull_users'} );
                                                                
 if ($event eq 'git-repository-create')
 {
@@ -73,10 +79,11 @@ if ($event eq 'git-repository-create')
   # www (so Apache can access it) but not anybody else.
   #------------------------------------------------------------
 
+  # Create the bare repository
   system("/usr/bin/git", "init", "--bare", "--shared=0660", "/home/e-smith/files/git/$gitRepositoryName.git") == 0
-	  or die "Error creating the initial bare git respository structure for /home/e-smith/files/git/$gitRepositoryName.git";
+    or die "Error creating the initial bare git repository structure for /home/e-smith/files/git/$gitRepositoryName.git";
 
-  # Init the Git description 
+  # Init the Git Description 
   open(my $file, '>', "/home/e-smith/files/git/$gitRepositoryName.git/description");
   print $file $repository->prop('description') . "\n"; 
   
@@ -96,20 +103,23 @@ if ($event eq 'git-repository-create')
   close($file);
   chmod 0770, "/home/e-smith/files/git/$gitRepositoryName.git/hooks/post-update";
   
+  # Set Administrator as the effective owner of the repository
   chdir "/home/e-smith/files/git/$gitRepositoryName.git"
     or die "Could not chdir to /home/e-smith/files/git/$gitRepositoryName.git";
 
   system("/usr/bin/git", "config", "--add", "gitweb.owner", "Administrator") == 0
     or die "Could not change gitweb.owner setting in /home/e-smith/files/git/$gitRepositoryName.git";
 
+  # Create a 'post-receive-email' hook to send emails when PUSH actions occur
   system("/bin/ln", "-sf", "/usr/share/git-core/contrib/hooks/post-receive-email", "hooks/post-receive") == 0
-    or die "Could not link post-receive-email hook in /home/e-smith/files/git/$gitRepositoryName.git";
+    or die "Could not link 'post-receive-email' hook in /home/e-smith/files/git/$gitRepositoryName.git";
     
   system("/usr/bin/git", "config", "--add", "hooks.emailprefix", "[GIT] ") == 0
     or die "Could not change hooks.emailprefix setting in /home/e-smith/files/git/$gitRepositoryName.git";
     
+  # Create the email list with the effective push & pull users.
   system("/usr/bin/git", "config", "--add", "hooks.mailinglist", $effective_pull_push_users ) == 0
-    or die "Could not create hooks.mailinglist in /home/e-smith/files/git/$gitRepositoryName.git";
+    or die "Could not create 'hooks.mailinglist' in /home/e-smith/files/git/$gitRepositoryName.git";
 }
 elsif ($event eq 'git-repository-modify')
 {
@@ -125,11 +135,13 @@ elsif ($event eq 'git-repository-modify')
   chdir "/home/e-smith/files/git/$gitRepositoryName.git"
     or die "Could not chdir to /home/e-smith/files/git/$gitRepositoryName.git";
 
+  # Update the email list with the effective push & pull users.
   system("/usr/bin/git", "config", "--replace-all", "hooks.mailinglist", $effective_pull_push_users ) == 0
-    or die "Could not update hooks.mailinglist in /home/e-smith/files/git/$gitRepositoryName.git";
+    or die "Could not update 'hooks.mailinglist' in /home/e-smith/files/git/$gitRepositoryName.git";
 
+  # Run an update-server-info action for good measure
   system("/usr/libexec/git-core/git-update-server-info") == 0
-	  or die "Error running 'update-server-info' on respository /home/e-smith/files/git/$gitRepositoryName.git";
+    or die "Error running 'update-server-info' on repository /home/e-smith/files/git/$gitRepositoryName.git";
 }
 
 #------------------------------------------------------------
