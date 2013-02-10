@@ -1,7 +1,7 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 11
-Summary: HTTPS access to centralised Git repositories on SME Server.
+%define release 26
+Summary: Centralised Git repositories with setup and configuration through SME Server admin panels.
 Name: %{name}
 Version: %{version}
 Release: %{release}%{?dist}
@@ -45,57 +45,46 @@ host.com/git. Repositories are then available as https://host.com/git/gitrepo.gi
 %prep
 %setup
 mkdir -p root/home/e-smith/files/git/
-true
 
 %build
 perl createlinks
-true 
 
 %install
 rm -rf $RPM_BUILD_ROOT
 (cd root   ; find . -depth -print | cpio -dump $RPM_BUILD_ROOT)
 rm -f %{name}-%{version}-filelist
 /sbin/e-smith/genfilelist $RPM_BUILD_ROOT > %{name}-%{version}-filelist
-true
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-true
 
 %post
-
 echo "--------------------------------------------------------------------------------------------"
-
-echo "Setting up git repositories configuration database ..."
-touch /home/e-smith/files/git
-
-echo "Setting up git repositories root directory ..."
-mkdir -p /home/e-smith/files/git
-chown admin:www /home/e-smith/files/git
-chmod 770 /home/e-smith/files/git
-chmod g+s /home/e-smith/files/git
-
-echo "Rebuilding server-manager ..."
-/sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
-/etc/e-smith/events/actions/navigation-conf
+if [ "$1" = "1" ] ; then
+  echo "Initial installation:"
+  echo " - Ensuring git repositories configuration database exist ..."
+  touch /home/e-smith/files/git
+  echo " - Ensuring git repositories root directory exist with the right permissions ..."
+  mkdir -p /home/e-smith/files/git
+  chown admin:www /home/e-smith/files/git
+  chmod 770 /home/e-smith/files/git
+  chmod g+s /home/e-smith/files/git
+  echo "Rebuilding server-manager ..."
+  /sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
+  /etc/e-smith/events/actions/navigation-conf
+fi
 /etc/rc7.d/S86httpd-e-smith sighup
-
 echo "--------------------------------------------------------------------------------------------"
 
 %postun
-
-echo "--------------------------------------------------------------------------------------------"
-
-echo "smeserver-git has been removed but the git repositories and the git config database are left in place ..."
-echo "To remove the git repositories, use: 'rm -rf /home/e-smith/files/git'"
-echo "To remove the git config database, use: 'rm -rf /home/e-smith/db/git'"
-
-echo "--------------------------------------------------------------------------------------------"
-
-echo "Rebuilding server-manager ..."
-/sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
-/etc/e-smith/events/actions/navigation-conf
-/etc/rc7.d/S86httpd-e-smith sighup
+if [ "$1" = "0" ] ; then
+  echo "--------------------------------------------------------------------------------------------"
+  echo "Final Uninstall:"
+  echo "  smeserver-git has been removed but the git repositories and the git config database are left in place ..."
+  echo "  To remove the git repositories, use: 'rm -rf /home/e-smith/files/git'"
+  echo "  To remove the git config database, use: 'rm -rf /home/e-smith/db/git'"
+  echo "--------------------------------------------------------------------------------------------"
+fi
 
 %files -f %{name}-%{version}-filelist
 %defattr(-,root,root)
