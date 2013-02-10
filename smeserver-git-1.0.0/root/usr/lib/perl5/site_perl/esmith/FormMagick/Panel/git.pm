@@ -33,6 +33,7 @@ use warnings;
 use esmith::FormMagick;
 use esmith::AccountsDB;
 use esmith::ConfigDB;
+use esmith::DomainsDB;
 use esmith::GitDB;
 
 use esmith::cgi;
@@ -47,31 +48,28 @@ use constant FALSE => 0;
 our @ISA = qw(esmith::FormMagick Exporter);
 
 our @EXPORT = qw(
-  git_print_logo
-  git_print_home_description
-  git_repository_print_add_button
-  git_repository_print_table
-  
-  git_repository_handle_create_or_modify
-  git_repository_handle_remove
-
+  git_home_print_logo
+  git_home_print_description
+  git_home_print_configure_button
+  git_home_print_add_repository_button
+  git_home_print_repository_table
+  git_handle_create_or_modify_repository
+  git_handle_remove_repository
+  git_repository_group_list
+  git_repository_user_list
   git_repository_validate_name
   git_repository_validate_name_does_not_exist
   git_repository_validate_name_length
-  
   git_repository_validate_description
-
   git_repository_print_name_field
+  git_repository_print_description_note
+  git_repository_print_access_note
+  git_repository_print_privileges_note
   git_repository_print_groups_and_users
-  git_repository_print_privileges
-  
-  git_repository_group_list
-  git_repository_user_list
-
   max_repository_name_length
+get_config_value
   getExtraParams
-  
-  print_save_or_add_button
+  git_repository_print_save_or_add_button
   validate_radio
   wherenext
 );
@@ -81,6 +79,9 @@ our $config_db = esmith::ConfigDB->open
 
 our $account_db = esmith::AccountsDB->open
   or die "Can't open the Account database : $!\n" ;
+
+our $domains_db = esmith::DomainsDB->open
+  or die "Can't open the Domains database : $!\n" ;
 
 our $git_db = esmith::GitDB->open
   or die "Can't open the Git database : $!\n" ;
@@ -132,10 +133,11 @@ sub new
 #######################################################################
 
 #----------------------------------------------------------------------
-# git_print_logo()
+# git_home_print_logo()
 # Print the Git logo image with a link reference to http://git-scm.com
 
-sub git_print_logo {
+sub git_home_print_logo
+{
   my $self = shift;
   my $q = $self->{cgi};
  
@@ -144,39 +146,57 @@ sub git_print_logo {
 }
 
 #----------------------------------------------------------------------
-# git_print_home_description()
+# git_home_print_description()
 
-sub git_print_home_description {
+sub git_home_print_description
+{
   my $self = shift;
   my $q = $self->{cgi};
- 
+
   print qq(<tr>);
-  print qq(<td><p>) . $self->localise('GIT_HOME_DESCRIPTION') . qq(</p></td>);
+  my $server = get_config_value('', 'SystemName') . "." . get_config_value('', 'DomainName');
+  print qq(<td><p>) . $self->localise('GIT_HOME_DESCRIPTION', {serverName => $server} ) . qq(</p></td>);
   print qq(<td><a href="http://git-scm.com" target="_blank"><img src="/server-common/git-logo.png" alt="GIT" style="float:right;margin:0 0 0 5px;" /></a></td>);
   print qq(</tr>);
-  return undef;    
+  return undef;
 }
 
 #----------------------------------------------------------------------
-# git_repository_print_add_button()
+# git_home_print_add_repository_button()
 # Prints a button to get to the add a new repository screen
 
-sub git_repository_print_add_button {
+sub git_home_print_add_repository_button
+{
   my $self = shift;
   my $q = $self->{cgi};
-    
+
   print qq(<tr><td colspan="2"><a class="button-like" href="git?page=0&page_stack=&Next=Next&wherenext=GitCreateModify">) . $self->localise('GIT_REPOSITORY_ADD_BUTTON') . qq(</a></td></tr>);
   return "";
 }
 
 #----------------------------------------------------------------------
-# git_repository_print_list()
+# git_home_print_configure_button()
+# Prints a button to get to the configuration screen
+
+sub git_home_print_configure_button
+{
+  my $self = shift;
+  my $q = $self->{cgi};
+
+  print qq(<tr><td colspan="2"><a class="button-like" href="git?page=0&page_stack=&Next=Next&wherenext=GitConfigure">) . $self->localise('GIT_CONFIGURE_BUTTON') . qq(</a></td></tr>);
+  return "";
+}
+
+#----------------------------------------------------------------------
+# git_home_print_repository_table()
 # This function displays a table of repositories on the system 
 # including the links to modify and remove the repository
 
-sub git_repository_print_table {
+sub git_home_print_repository_table
+{
   my $self                     = shift;
   my $q                        = $self->{cgi};
+
   my $name                     = $self->localise('GIT_REPOSITORY_NAME');
   my $description              = $self->localise('DESCRIPTION');
   my $access                   = $self->localise('GIT_ALLOW_FROM');
@@ -188,7 +208,8 @@ sub git_repository_print_table {
   
   my @repositories = $git_db->get_all_by_prop('type' => 'repository');
 
-  unless( scalar @repositories ) {
+  unless( scalar @repositories ) 
+  {
     print qq(<tr><td colspan="2"><p>) . $self->localise('GIT_NOTIFY_NO_REPOSITORIES') . qq(</a></td></tr>);
     return "";
   }
@@ -221,8 +242,11 @@ sub git_repository_print_table {
     my $href                   = "$scriptname?$params&action=modify&wherenext=";
     my $actionModify           = '&nbsp;' . $q->a({href => "${href}GitCreateModify"},$modify) . '&nbsp;';
     my $actionRemove           = '&nbsp;' . $q->a({href => "${href}GitRemove"}, $remove) . '&nbsp';
-
-    print $q->Tr (  esmith::cgi::genSmallCell($q, $repo_name . ".git",     "normal"),
+    my $repo_url               = $q->a({href => "https://" . get_config_value('', 'SystemName') . "." 
+                                                           . get_config_value('', 'DomainName') . "/git/"
+                                                           . $repo_name . ".git" }, $repo_name . ".git" );
+    
+    print $q->Tr (  esmith::cgi::genSmallCell($q, $repo_url,               "normal"),
                     esmith::cgi::genSmallCell($q, $repo_description,       "normal"),
                     esmith::cgi::genSmallCell($q, $repo_allow_access_from, "normal"),
                     esmith::cgi::genSmallCell($q, $repo_pull,              "normal"),
@@ -237,10 +261,14 @@ sub git_repository_print_table {
 }
 
 #----------------------------------------------------------------------
-# print_privileges()
-sub print_privileges {
+# git_repository_print_privileges_note()
+# Screen: repository
+
+sub git_repository_print_privileges_note
+{
   my $self = shift;
   my $q = $self->{cgi};
+
   print qq(<tr><td colspan="2">) . $self->localise('GIT_PRIVILEGES_NOTE') . qq(</td></tr>);
   return "";
 }
@@ -250,9 +278,11 @@ sub print_privileges {
 # Prints the ADD button when a new repository is addded and the SAVE buttom 
 # whem modifications are made.
 
-sub git_repository_print_save_or_add_button {
+sub git_repository_print_save_or_add_button
+{
   my ($self) = @_;
   my $action = $self->cgi->param("action") || '';
+
   if( $action eq "modify" ) {
     $self->print_button("SAVE");
   } else {
@@ -273,7 +303,8 @@ Constructs the parameters for the links in the repository table
 
 =cut
 
-sub build_repository_cgi_params {
+sub build_repository_cgi_params 
+{
   my ($self, $repositoryName, %oldprops) = @_;
 
   #$oldprops{'description'} = $oldprops{Name};
@@ -294,19 +325,61 @@ sub build_repository_cgi_params {
 
 *wherenext = \&CGI::FormMagick::wherenext;
 
-sub git_repository_print_name_field {
+#----------------------------------------------------------------------
+# git_repository_group_list()
+# Returns a hash of groups for the Create/Modify screen's group 
+# field's drop down list. It includes the special groups 'admin' 
+# for administrators and 'shared' for everybody on the local system. 
+
+sub git_repository_group_list
+{
+  my $self   = shift;
+  my @groups = $account_db->groups();
+  
+  my %groups = ( admin  => $self->localise('GIT_GROUP_ADMINISTRATORS') ." (admin)", 
+                 shared => $self->localise('GIT_GROUP_EVERYBODY') ." (shared)" );
+                 
+  foreach my $group (@groups) 
+  {
+    $groups{ $group->key() } = $group->prop('Description')." (".$group->key.")";
+  }
+  
+  return \%groups;
+}
+
+#----------------------------------------------------------------------
+# git_repository_user_list()
+# Returns a hash of users for the Create/Modify screen's user field's
+# drop down list, It explicitly adds the special user 'admin' as this 
+# user is not listed in the accounds database.
+
+sub git_repository_user_list
+{
+  my $self  = shift;
+  my @users = $account_db->users();
+  my %users = ( admin => $self->localise('GIT_USER_ADMINISTRATOR') ." (admin)" );
+  
+  foreach my $user (@users) 
+  {
+    $users{ $user->key() } = $user->prop('LastName').", ". $user->prop('FirstName')." (". $user->key.")";
+  }
+
+  return \%users;
+}
+
+#----------------------------------------------------------------------
+
+sub git_repository_print_name_field 
+{
   my $self = shift;
   my $in = $self->{cgi}->param('name') || '';
   my $action = $self->{cgi}->param('action') || '';
   my $maxLength = $config_db->get_prop('git', 'maxNameLength' ) || '31';
   
-  print qq(<tr><td colspan="2">) . $self->localise('GIT_NAME_FIELD_DESC', {maxLength => $maxLength}) . qq(</td></tr>);
-      
-  print qq(<tr><td class="sme-noborders-label">) .
-      $self->localise('NAME') . qq(</td>\n);
-      
   if ($action eq 'modify' and $in) {
     my $repository = $git_db->get($in);
+    print qq(<tr><td colspan="2">) . $self->localise('GIT_NAME_FIELD_MODIFY_DESC', {maxLength => $maxLength}) . qq(</td></tr>);
+    print qq(<tr><td class="sme-noborders-label">) . $self->localise('NAME') . qq(</td>\n);
     print qq(
           <td class="sme-noborders-content">
             <input type="text" name="name" value="$in.git" disabled>
@@ -327,6 +400,8 @@ sub git_repository_print_name_field {
       $q->param(-name=>'push_users',        -value=>join(FS, split(FS, $repository->prop('push_users'))));
     }
   } else {
+    print qq(<tr><td colspan="2">) . $self->localise('GIT_NAME_FIELD_CREATE_DESC', {maxLength => $maxLength}) . qq(</td></tr>);
+    print qq(<tr><td class="sme-noborders-label">) . $self->localise('NAME') . qq(</td>\n);
     print qq(
           <td>
             <input type="text" name="name" value="$in">
@@ -339,70 +414,181 @@ sub git_repository_print_name_field {
 }
 
 #----------------------------------------------------------------------
-# git_repository_group_list()
-# Returns a hash of groups for the Create/Modify screen's group 
-# field's drop down list. It includes the special groups 'admin' 
-# for administrators and 'shared' for everybody on the local system. 
+# git_repository_print_description_note()
+# Screen: repository
 
-sub git_repository_group_list
+sub git_repository_print_description_note
 {
   my $self = shift;
-  my @groups = $account_db->groups();
-  
-  my %groups = ( admin  => $self->localise('GIT_GROUP_ADMINISTRATORS') ." (admin)", 
-                 shared => $self->localise('GIT_GROUP_EVERYBODY') ." (shared)" );
-                 
-  foreach my $g (@groups) {
-    $groups{ $g->key() } = $g->prop('Description')." (".$g->key.")";
-  }
-  
-  return \%groups;
+  my $q = $self->{cgi};
+
+  print qq(<tr><td colspan="2">) . $self->localise('GIT_DESCRIPTION_FIELD_DESC') . qq(</td></tr>);
+  return "";
 }
 
 #----------------------------------------------------------------------
-# git_repository_user_list()
-# Returns a hash of users for the Create/Modify screen's user field's
-# drop down list, It explicitly adds the special user 'admin' as this 
-# user is not listed in the accounds database.
+# git_repository_print_access_note()
+# Screen: repository
 
-sub git_repository_user_list
+sub git_repository_print_access_note
 {
   my $self = shift;
-  my @users = $account_db->users();
-  
-  my %users = ( admin => $self->localise('GIT_USER_ADMINISTRATOR') ." (admin)" );
-  
-  foreach my $u (@users) {
-    $users{ $u->key() } = $u->prop('LastName').", ". $u->prop('FirstName')." (". $u->key.")";
-  }
+  my $q = $self->{cgi};
 
-  return \%users;
+  print qq(<tr><td colspan="2">) . $self->localise('GIT_ACCESS_FIELD_DESC') . qq(</td></tr>);
+  return "";
 }
+
+#----------------------------------------------------------------------
+# get_config_value ITEM
+# A simple accessor for esmith::ConfigDB::Record::value
+
+sub get_config_value
+{
+  my $fm = shift;
+  my $item = shift;
+  my $record = $config_db->get($item);
+  if ($record) 
+  {
+    return $record->value();
+  }
+  else 
+  {
+    return '';
+  }
+}
+
+#----------------------------------------------------------------------
+
+# git_repository_print_domains()
+
+# When this server has more than one domain this function takes
+# the list of domains and returns a string of html checkboxes
+# for all these domains. 
+
+# Those domains that are listed with this git environment 
+# will have their checkbox checked.
+
+# sub git_repository_print_domains
+# {
+  # # Retrieve the Git account name from the CGI parameters
+  # my $self   = shift;
+  # my $name   = $self->{'cgi'}->param('name');
+  # my $action = $self->{'cgi'}->param("action") || '';
+  # my $out    = "";
+
+  # # Get a full list of all the domains on this server.
+  # my @domains = $DomainsDB->get_all_by_prop( type => 'domain' );
+  # my $numdomains = @domains;
+
+  # # If there is more than one domain, we generate a list
+  # # of checkboxes. Otherwise we just show the primary domain.
+  # if ($numdomains > 1) {
+
+    # # Get the list of the Domains for which Git is active.
+    # my $git_domains_list = "";
+    # if ($AccountsDB->get($name)) {
+      # $git_domains_list = $AccountsDB->get($name)->prop('Domains');
+    # }
+
+    # # Split the comma separated list into the individual bits.
+    # my %git_domains;
+    # foreach my $git_domain ( split ( /,/, $git_domains_list ) ) {
+      # $git_domains{$git_domain} = 1;
+    # }
+
+    # # Now generate the table of domains with a checkbox in front of it.
+    # # If the domain is in our listed domains for Git, the
+    # # checkbox will show checked.
+    # $out  =     "    <tr>\n";
+    # $out .=     "      <td colspan=2>" . $fm->localise('GIT_FIELD_DOMAINS_DESCRIPTION') . "</td>";
+    # $out .=     "    </tr>\n";
+    # $out .=     "    <tr>\n";
+    # $out .=     "      <td class=\"sme-noborders-label\">" . $fm->localise('GIT_FIELD_DOMAINS') . "</td>\n";
+    # $out .=     "      <td>\n";
+    # $out .=     "        <table border='0' cellspacing='0' cellpadding='0'>\n";
+    # $out .=     "          <tr>\n";
+
+    # foreach my $domain (sort @domains) {
+      # # If this is a ADD form, we default check all domains, otherwise only
+      # # those that are in our Git configuration.
+      # my $checked = "";
+      # if ( $action eq 'modify' ) {
+        # if ( $git_domains{ $domain->key() } ) {
+          # $checked = "checked";
+        # }
+      # } else   {
+        # $checked = "checked";
+      # }
+      # $out .= "          <tr>\n";
+      # $out .= "            <td><input type=\"checkbox\" name=\"gitDomains\" $checked value=\"" . $domain->key . "\"></td>\n";
+      # $out .= "            <td>" . $domain->key . "</td>\n";
+      # $out .= "          </tr>\n";
+    # }
+
+    # $out .=     "        </table>\n";
+    # $out .=     "      </td>\n";
+    # $out .=     "    </tr>\n";
+  # }
+  # else
+  # {
+    # # We only have a single domain, so we just show this domain but without the
+    # # checkbox (so it can't be unchecked).
+    # my $domainname = $ConfigDB->get('DomainName')->value();
+    # $out  =     "    <tr>\n";
+    # $out .=     "      <td colspan=2>" . $fm->localise('GIT_FIELD_DOMAIN_DESCRIPTION') . "</td>";
+    # $out .=     "    </tr>\n";
+    # $out .=     "    <tr>\n";
+    # $out .=     "      <td class=\"sme-noborders-label\">" . $fm->localise('GIT_FIELD_DOMAIN') . "</td>\n";
+    # $out .=     "      <td><input type=\"hidden\" name=\"tracDomains\" value=\"" . $domainname . "\">";
+    # $out .=                $domainname . "</td>\n";
+    # $out .=     "    </tr>\n";
+  # }
+
+  # return $out;
+# }
+
 
 #######################################################################
 # THE ROUTINES THAT ACTUALLY DO THE WORK
 #######################################################################
 
 #----------------------------------------------------------------------
-# git_repository_handle_add_or_modify()
-# Determine whether to modify or add the git repository
+# git_handle_configuration_update()
 
-sub git_repository_handle_create_or_modify {
+sub git_handle_configuration_update 
+{
   my ($self) = @_;
 
-  my $action = $self->cgi->param("action") || '';
-  if( $action eq "create") {
-    $self->git_repository_handle_create();
+  if( system ( "/sbin/e-smith/signal-event", "git-modify" ) == 0 ) {
+    $self->success("GIT_SUCCESS_CONFIGURATION_UPDATE");
   } else {
-    $self->git_respository_handle_modify();
+    $self->error("GIT_ERROR_CONFIGURATION_UPDATE");
   }
 }
 
 #----------------------------------------------------------------------
-# git_repository_handle_create()
+# git_handle_create_or_modify_repository()
+# Determine whether to modify or add the git repository
+
+sub git_handle_create_or_modify_repository 
+{
+  my ($self) = @_;
+
+  my $action = $self->cgi->param("action") || '';
+  if( $action eq "create") {
+    $self->git_handle_create_repository();
+  } else {
+    $self->git_handle_modify_repository();
+  }
+}
+
+#----------------------------------------------------------------------
+# git_handle_create_repository()
 # Handle the create event for the git repository
 
-sub git_repository_handle_create {
+sub git_handle_create_repository 
+{
   my ($self) = @_;
   my $repositoryName = $self->cgi->param('name');
   my $msg;
@@ -495,10 +681,11 @@ sub git_repository_handle_create {
 }
 
 #----------------------------------------------------------------------
-# git_respository_handle_modify()
+# git_handle_modify_repository()
 # Handle the modify event for the repository
 
-sub git_respository_handle_modify {
+sub git_handle_modify_repository 
+{
   my ($self) = @_;
   my $repositoryName = $self->cgi->param('name');
   my $msg;
@@ -581,10 +768,11 @@ sub git_respository_handle_modify {
 }
 
 #----------------------------------------------------------------------
-# git_repository_remove()
+# git_handle_remove_repository()
 # Handle the remove event for the repository
 
-sub git_repository_handle_remove {
+sub git_handle_remove_repository 
+{
   my ($self) = @_;
   my $repositoryName = $self->cgi->param('name');
   if( my $repository = $git_db->get($repositoryName) ) {
@@ -613,14 +801,9 @@ sub git_repository_handle_remove {
 # VALIDATION ROUTINES
 #######################################################################
 
-
 #----------------------------------------------------------------------
-
-=head2 getExtraParams()
-
-Sets variables used in the lexicon to their required values.
-
-=cut
+# getExtraParams()
+# Sets variables used in the lexicon to their required values.
 
 sub getExtraParams
 {
@@ -644,7 +827,8 @@ sub getExtraParams
 # Checks that the name supplied does not contain any unacceptable chars.
 # Returns OK on success or a localised error message otherwise.
 
-sub git_repository_validate_name {
+sub git_repository_validate_name 
+{
   my( $self, $repositoryName ) = @_;
   unless( $repositoryName =~ /^([A-Za-z][\_\-A-Za-z0-9]*)$/ ) {
     return $self->localise('GIT_ERROR_NAME_HAS_INVALID_CHARS',
@@ -659,7 +843,8 @@ sub git_repository_validate_name {
 # Checks that the name supplied does not contain any unacceptable chars.
 # Returns OK on success or a localised error message otherwise.
 
-sub git_repository_access_allowed_from {
+sub git_repository_access_allowed_from 
+{
   my ($self, $accessAllowedFrom) = @_;
 
   if( $accessAllowedFrom eq 'internet' ) {
@@ -678,7 +863,8 @@ sub git_repository_access_allowed_from {
 # that are allowed access. Groups are printed in bold. When there are no groups or users
 # it returns Anonymous.
 
-sub git_repository_print_groups_and_users {
+sub git_repository_print_groups_and_users 
+{
   my ($self, $groups, $users) = @_;
 
   unless( $groups || $users ) {
@@ -724,7 +910,8 @@ sub git_repository_validate_name_does_not_exist
 # maxAcctNameLength record of the configuration database.  Defaults to a
 # maximum length of $self->{defaultMaxLength} if nothing is set in the 
 # config db.
-sub git_repository_validate_name_length {
+sub git_repository_validate_name_length 
+{
   my( $self, $data ) = @_;
   $config_db->reload();
   my $max;
@@ -748,7 +935,8 @@ sub git_repository_validate_name_length {
 #
 # Checks that the description supplied does not contain any unacceptable chars.
 # Returns OK on success or a localised error message otherwise.
-sub git_repository_validate_description {
+sub git_repository_validate_description 
+{
   my( $self, $repositoryDescription ) = @_;
   unless( $repositoryDescription =~ /^([\w\s\_\.\-]*)$/ ) {
     return $self->localise('GIT_ERROR_DESCRIPTION_HAS_INVALID_CHARS',
@@ -761,7 +949,8 @@ sub git_repository_validate_description {
 # validate_radio()
 # Checks wether a value is checked for a radio button
 
-sub validate_radio {
+sub validate_radio 
+{
   my( $self, $acctName ) = @_;
   unless( $acctName ne '' ) {
     return $self->localise( 'GIT_ERROR_RADIO_VALUE_NOT_CHECKED', 
