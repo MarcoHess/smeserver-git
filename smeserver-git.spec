@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 27
+%define release 30
 Summary: Centralised Git repositories with setup and configuration through SME Server admin panels.
 Name: %{name}
 Version: %{version}
@@ -63,7 +63,8 @@ echo "--------------------------------------------------------------------------
 if [ "$1" = "1" ] ; then
   echo "Initial installation:"
   echo " - Ensuring git repositories configuration database exist ..."
-  touch /home/e-smith/files/git
+  touch /home/e-smith/db/git
+  chmod 664 /home/e-smith/db/git
   echo " - Ensuring git repositories root directory exist with the right permissions ..."
   mkdir -p /home/e-smith/files/git
   chown admin:www /home/e-smith/files/git
