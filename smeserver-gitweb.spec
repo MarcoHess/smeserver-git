@@ -1,7 +1,7 @@
 %define name smeserver-gitweb
 %define version 1.0.0
-%define release 7
-Summary: GitWeb web based Git repository viewer on SME Server
+%define release 11
+Summary: GitWeb is a web based Git repository viewer on SME Server
 Name: %{name}
 Version: %{version}
 Release: %{release}%{?dist}
@@ -50,11 +50,14 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 echo "Ensuring git database is accessible to GitWeb ..."
-chmod 664 /home/e-smith/db/git
+touch /home/e-smith/db/git
+chmod 644 /home/e-smith/db/git
 echo "Ensuring networks database is accessible to GitWeb ..."
-chmod 664 /home/e-smith/db/networks
+chmod 644 /home/e-smith/db/networks
 echo "Expanding gitweb.conf template ..."
 /sbin/e-smith/expand-template /etc/gitweb.conf
+echo "Expanding GitWeb home page text template ..."
+/sbin/e-smith/expand-template /etc/e-smith/web/common/gitweb/home_text.html
 echo "Expanding web server template ..."
 /sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
 /etc/rc7.d/S86httpd-e-smith sighup
