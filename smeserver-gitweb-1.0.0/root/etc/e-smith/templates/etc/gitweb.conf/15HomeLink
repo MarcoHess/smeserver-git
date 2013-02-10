@@ -1,7 +1,19 @@
 {
- $OUT = "";
- $OUT .= "# Home Link:\n";
- $OUT .= "# configured with: config setprop git domain <name>\n";
- $OUT .= "\$home_link = \"https://" . $git{'domain'} . "/\"\;\n";
- $OUT .= "\$home_link_str = \"" . $git{'domain'} . "\"\;\n";
+  # Setup the home link
+  # Allow override with: config setprop git Domain <name>
+  # Otherwise default to the primary system domain
+ 
+  use esmith::ConfigDB;
+
+  my $config_db = esmith::ConfigDB->open_ro() or
+    die "Couldn't open ConfigDB\n";
+
+  my $SystemName = $config_db->get("SystemName")->value;
+  my $DomainName = $config_db->get("DomainName")->value;
+  my $GitWebHomeLink = "https://" . $SystemName . "." . $DomainName . "/git"; 
+
+  $OUT = "";
+  $OUT .= "# Home Link:\n";
+  $OUT .= "\$home_link = \"" . $GitWebHomeLink . "\"\;\n";
+  $OUT .= "\$home_link_str = \""  . $GitWebHomeLink . "\"\;\n";
 }
