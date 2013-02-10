@@ -224,24 +224,8 @@
     $OUT .= "    SetEnv GITWEB_CONFIG /etc/gitweb.conf\n";
     $OUT .= "\n";
   
-    if( $gitweb_theme eq 'enabled' ) {
-      $OUT .= "    # Overide github CSS & JS file to enable a Github lookalike theme:\n";
-      $OUT .= "    Alias  $gitpath/static/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
-      $OUT .= "    Alias  $gitpath/static/gitweb.js       /etc/e-smith/web/common/gitweb/gitweb.js\n";
-      $OUT .= "    Alias  /static/gitweb.css          /etc/e-smith/web/common/gitweb/gitweb.css\n";
-      $OUT .= "    Alias  /static/gitweb.js           /etc/e-smith/web/common/gitweb/gitweb.js\n";
-      $OUT .= "\n";
-    }
-
-    $OUT .= "    # Static files used by Gitweb. \n";
-    $OUT .= "    Alias        $gitpath                 $GitWebRoot\n";
-    
-    $OUT .= "    # Serve HTML with gitweb. Use Alias to also allow serving required CSS and JS files.\n";
-#   $OUT .= "    ScriptAlias  $gitpath                 $GitWebRoot/gitweb.cgi\n";
-    $OUT .= "\n";
-    
 #    $OUT .= "    # Ensure we can browse the repo with http://server.com/git/repo.git\n";
-#    $OUT .= "    # instead of http://git.server.com/git?p=repo.git;a=summary.\n";
+#    $OUT .= "    # instead of http://server.com/git?p=repo.git;a=summary.\n";
 #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
 #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
 #    $OUT .= "    RewriteRule ^$gitpath\/gitweb.cgi\(\.\*\\.git)\$ $gitpath/gitweb.cgi\$1 [PT]\n";
@@ -250,7 +234,21 @@
 #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
 #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
 #    $OUT .= "    RewriteRule ^/$git_subdir/(.*\\.git/(?!/?(HEAD|info|objects|refs)).*)?\$ $gitpath/gitweb/gitweb.cgi%{REQUEST_URI} [L,PT]\n\n";
-    
+
+    if( $gitweb_theme eq 'enabled' ) {
+      $OUT .= "    # Overide gitweb CSS & JS file to enable a Github lookalike theme:\n";
+      $OUT .= "    Alias  $gitpath/static/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
+      $OUT .= "    Alias  $gitpath/static/gitweb.js       /etc/e-smith/web/common/gitweb/gitweb.js\n";
+      $OUT .= "\n";
+    }
+    $OUT .= "    # Static & CGI files used by Gitweb. \n";
+    $OUT .= "    Alias        $gitpath                 $GitWebRoot\n";
+    $OUT .= "\n";
+
+#    $OUT .= "    # Serve HTML with gitweb. Use Alias to also allow serving required CSS and JS files.\n";
+#    $OUT .= "    ScriptAlias  $gitpath                 $GitWebRoot/gitweb.cgi\n";
+#    $OUT .= "\n";
+
     $OUT .= "    # Access permissions for gitweb scripts\n";
     $OUT .= "    <Directory $GitWebRoot>\n";
     $OUT .= "      Options        ExecCGI\n";
@@ -261,12 +259,15 @@
     $OUT .= "      Allow from     $gitweb_allow\n";
     $OUT .= "    </Directory>\n\n";
 
-    $OUT .= "    # Access permissions for additional gitweb files (e.g. theme)\n";
-    $OUT .= "    <Directory /etc/e-smith/web/common/gitweb>\n";
-    $OUT .= "      AllowOverride  None\n";
-    $OUT .= "      Order          Allow,Deny\n";
-    $OUT .= "      Allow from     $gitweb_allow\n";
-    $OUT .= "    </Directory>\n\n";
+    if( $gitweb_theme eq 'enabled' ) {
+      $OUT .= "    # Access permissions for additional gitweb theme files\n";
+      $OUT .= "    <Directory /etc/e-smith/web/common/gitweb>\n";
+      $OUT .= "      AllowOverride  None\n";
+      $OUT .= "      Order          Allow,Deny\n";
+      $OUT .= "      Allow from     $gitweb_allow\n";
+      $OUT .= "    </Directory>\n\n";
+    }
+    
   } else {
     $OUT .= "    # Gitweb disabled or not installed\n\n";
   }
