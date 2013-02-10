@@ -20,20 +20,25 @@
     <trans>
       <![CDATA[ 
         <p>This panel allows managing centralised Git repositories on this server.</p>
-        <p>Configured Git repositories be available through the git subdomain and via HTTPS like in https://git.thisserver.com/repository.git.</p>
-        <p>The Git repositories can also be viewed through a web interface from the top of the git subdomain (i.e. https://git.thisserver.com).</p>
+        <p>Configured Git repositories are available via HTTPS like in https://{$serverName}/git/repository.git.</p>
+        <p>When Gitweb is also installed, the Git repositories can also be viewed through a web interface https://{$serverName}/git</p>
         <p>For more details and documentation on using Git, click on the Git logo on the right.</p>
       ]]>
     </trans>
   </entry>
 
   <entry>
-	  <base>GIT_REPOSITORY_ADD_BUTTON</base>
+    <base>GIT_REPOSITORY_ADD_BUTTON</base>
     <trans>Add a Git Repository</trans>
+  </entry>
+
+  <entry>
+    <base>GIT_CONFIGURE_BUTTON</base>
+    <trans>Configure Git</trans>
   </entry>
   
   <entry>
-	  <base>GIT_REPOSITORY_LIST_DESCRIPTION</base>
+    <base>GIT_REPOSITORY_LIST_DESCRIPTION</base>
     <trans>
       <![CDATA[ 
         <p>The table below lists the currently configured Git repositories on this server.</p>
@@ -45,20 +50,45 @@
   </entry>
  
   <entry>
-	  <base>GIT_ADD_TITLE</base>
-	  <trans>Create or modify a Git repository</trans>
+    <base>GIT_ADD_TITLE</base>
+    <trans>Create or modify a Git repository</trans>
   </entry>
   
   <entry>
-  	<base>GIT_NAME_FIELD_DESC</base>
-	  <trans>The Git repository name should contain only 
-upper or lower-case letters, numbers, periods, hyphens and underscores, and 
-should start with a letter. For example "johnson", 
-"Intra", and "cust3.prj12" are all valid names, but "3associates", 
-and "Bus!Partner" are not. The name is limited to {$maxLength} 
-characters.</trans>
+    <base>GIT_NAME_FIELD_CREATE_DESC</base>
+    <trans>Provide a name for the Git repository to be created. The repository
+           will be created as a bare repository and will automatically have the
+           extension .git added to the name.
+           Note the name should contain only upper or lower-case letters, numbers, 
+           periods, hyphens and underscores, and should start with a letter. 
+           For example "johnson", "Intra", and "cust3.prj12" are all valid names,
+           but "3associates", and "Bus!Partner" are not. 
+           The name is limited to {$maxLength} characters.</trans>
   </entry>
 
+  <entry>
+    <base>GIT_NAME_FIELD_MODIFY_DESC</base>
+    <trans>The field below indicates the name of the git respository.
+           The name can not be modified.</trans>
+  </entry>
+  
+  <entry>
+    <base>GIT_DESCRIPTION_FIELD_DESC</base>
+    <trans>The description below correspond to the "description" file in the 
+           Git repository and is used by GitWeb to display the repository description
+           on the GitWeb page.
+    </trans>
+  </entry>
+
+  <entry>
+    <base>GIT_ACCESS_FIELD_DESC</base>
+    <trans>Select the required network access for the repository. Select "Local Network Only" if you want to 
+           prevent any external access to the repository. Select "Internet" if you do want to make the 
+           repository accessible remotely. The network access setting is in addition to the user and group
+           push/pull permissions configured below.
+    </trans>
+  </entry>
+  
   <entry>
   	<base>GIT_REMOVE_TITLE</base>
 	  <trans>Remove Git Repository</trans>
@@ -87,6 +117,26 @@ characters.</trans>
     <trans>Remove Git Repository</trans>
   </entry>
 
+  <entry>
+    <base>GIT_CONFIGURATION_TITLE</base>
+    <trans>Configure Git Settings</trans>
+  </entry>
+
+  <entry>
+    <base>GIT_PATH</base>
+    <trans>Git Path Prefix</trans>
+  </entry>
+  
+  <entry>
+    <base>GIT_CONFIGURATION_DESCRIPTION</base>
+    <trans>Configure the global configuration settings for Git on this server</trans>
+  </entry>
+  
+  <entry>
+    <base>GIT_CONFIGURATION_UPDATE_BUTTON</base>
+    <trans>Save Git Configuration</trans>
+  </entry>
+  
   <entry>
     <base>GIT_LABEL_ALLOW_ACCESS_FROM</base>
     <trans>Allow repository access from</trans>
@@ -137,7 +187,7 @@ characters.</trans>
     <trans>
       <![CDATA[ <p> Use the selection boxes below to you configure the pull and push permissions for the Git repository.<br />
       Select either groups or individual users. Press the SHIFT and/or the CTRL key to select multiple groups or users.<br />
-      If you set <b>neither</b> a group or user setting, the repositoty will be accessible <b>anonymously</b>! (i.e. no user name or password will be required).<br />
+      If you set <b>neither</b> a group or user setting, the repository will be accessible <b>anonymously</b>! (i.e. no user name or password will be required).<br />
       If you specify users or groups for pull permissions, the push users will also have pull access.<br />
       If you want your user(s) or group(s) to have exclusive full pull and push access, specify them in <b>both</b> the pull and push box.<br />
       The group <b>admin</b> includes all administrators and the group <b>shared</b> includes all local users on this system.</p> ]]>
@@ -266,7 +316,7 @@ characters.</trans>
 
   <entry>
     <base>GIT_ERROR_ALREADY_EXISTS</base>
-    <trans>The repository "{$repositoryName}" is an existing Git repository. There is no new repository created. Use the 'Modify' link in the table below to reconfigure the existing respository.</trans>
+    <trans>The repository "{$repositoryName}" is an existing Git repository. There is no new repository created. Use the 'Modify' link in the table below to reconfigure the existing repository.</trans>
   </entry>
 
 </lexicon>
