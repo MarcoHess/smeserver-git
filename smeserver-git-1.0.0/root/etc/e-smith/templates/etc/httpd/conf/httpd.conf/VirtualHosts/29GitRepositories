@@ -324,7 +324,7 @@
       $OUT .= "      AuthName      \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!"). ")\"\n";
       $OUT .= "      Require user  $effective_pull_push_users\n\n";
       $OUT .= "      # Non-Anonymous PULL requires SSL\n";
-      $OUT .= "      SSLRequireSSL\n\n";
+      $OUT .= "      SSLRequireSSL\n";
     } else {
       $OUT .= "      # Anoymous Pull Access\n";
     }

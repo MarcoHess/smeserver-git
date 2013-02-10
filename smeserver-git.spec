@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 26
+%define release 27
 Summary: Centralised Git repositories with setup and configuration through SME Server admin panels.
 Name: %{name}
 Version: %{version}
