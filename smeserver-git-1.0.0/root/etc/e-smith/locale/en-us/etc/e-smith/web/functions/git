@@ -196,22 +196,22 @@
   
   <entry>
     <base>GIT_PRIVILEGES_GROUPS_PULL</base>
-    <trans>Groups allowed to pull</trans>
+    <trans>Groups allowed to read/pull</trans>
   </entry>
 
   <entry>
     <base>GIT_PRIVILEGES_GROUPS_PUSH</base>
-    <trans>Groups allowed to push</trans>
+    <trans>Groups allowed to write/push</trans>
   </entry>
 
   <entry>
     <base>GIT_PRIVILEGES_USERS_PULL</base>
-    <trans>Users allowed to pull</trans>
+    <trans>Users allowed to read/pull</trans>
   </entry>
   
   <entry>
     <base>GIT_PRIVILEGES_USERS_PUSH</base>
-    <trans>Users allowed to push</trans>
+    <trans>Users allowed to write/push</trans>
   </entry>
 
   <entry>
