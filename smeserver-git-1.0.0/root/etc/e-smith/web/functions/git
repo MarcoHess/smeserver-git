@@ -8,7 +8,7 @@
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
-# Copyright (C) 2012 - Marco Hess <marco.hess@through-ip.com>
+# Copyright (C) 2013 - Marco Hess <marco.hess@through-ip.com>
 #
 # This file is part of the "Git Repositories" panel in the
 # SME Server server-manager panel to configure git repositories.
@@ -46,20 +46,24 @@ __DATA__
     name="First"
     pre-event="print_status_message()" >
 
-    <subroutine src="git_print_home_description()" />
+    <subroutine src="git_home_print_description()" />
+
+    <!-- <subroutine src="git_home_print_configure_button()" /> -->
     
-    <subroutine src="git_repository_print_add_button()" />
+    <subroutine src="git_home_print_add_repository_button()" />
     
-    <subroutine src="git_repository_print_table()" />
+    <subroutine src="git_home_print_repository_table()" />
   </page>
 
   <!-- page 1 -->
   <page name="GitCreateModify" 
     pre-event="turn_off_buttons()" 
-    post-event="git_repository_handle_create_or_modify()">
+    post-event="git_handle_create_or_modify_repository()">
    
     <subroutine src="git_repository_print_name_field()" />
-    
+
+    <subroutine src="git_repository_print_description_note()" />
+
     <field 
       type="text" 
       id="description"
@@ -67,20 +71,23 @@ __DATA__
       <label>DESCRIPTION</label>
     </field>
 
+    <subroutine src="git_repository_print_access_note()" />
+    
     <field 
       type="radio" 
       id="allow_access_from" 
-      options="'local', 'internet'"
+      options="'local' => 'GIT_ACCESS_ALLOWED_FROM_LOCAL',
+               'internet' => 'GIT_ACCESS_ALLOWED_FROM_INTERNET'"
       validation="validate_radio">
       <label>GIT_LABEL_ALLOW_ACCESS_FROM</label>
     </field>
 
-    <subroutine src="print_privileges()" />
+    <subroutine src="git_repository_print_privileges_note()" />
 
     <field 
-      type="select" 
-      id="pull_groups" 
-      options="git_repository_group_list()" 
+      type="select"
+      id="pull_groups"
+      options="git_repository_group_list()"
       multiple="1" size="5">
       <label>GIT_PRIVILEGES_GROUPS_PULL</label>
     </field>
@@ -116,12 +123,32 @@ __DATA__
   <page 
     name="GitRemove" 
     pre-event="turn_off_buttons()" 
-    post-event="git_repository_handle_remove()">
+    post-event="git_handle_remove_repository()">
         
     <title>GIT_REMOVE_TITLE</title>
     <description>GIT_REMOVE_DESCRIPTION</description>
     
     <subroutine src="print_button('GIT_REMOVE_BUTTON')" />
+
   </page>
 
+  <!-- page 3 -->
+  <page 
+    name="GitConfigure" 
+    pre-event="turn_off_buttons()" 
+    post-event="git_handle_configuration_update()">
+        
+    <title>GIT_CONFIGURATION_TITLE</title>
+    <description>GIT_CONFIGURATION_DESCRIPTION</description>
+
+    <field 
+      type="text" 
+      id="gitpath"
+      validation="git_validate_gitpath">
+      <label>GIT_PATH</label>
+    </field>
+
+    <subroutine src="print_button('GIT_CONFIGURATION_UPDATE_BUTTON')" />
+  </page>
+  
 </form>
