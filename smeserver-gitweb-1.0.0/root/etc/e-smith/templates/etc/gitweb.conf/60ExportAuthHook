@@ -32,13 +32,16 @@ $export_auth_hook = sub \{
     # Retrieve project properties from database
     my $git_db = esmith::GitDB->open_ro() or
       die "Could not open the Git repository database!\n";
+      
     my $repository = $git_db->get($projectname) or 
       die "The git repository '$projectname' does not seem to exist in the Git repository database!\n";
+      
     my %properties = $repository->props;  
 
     # Check if the request is from a local IP address for this host
     my $networks_db = esmith::NetworksDB->open_ro() or
       die "Could not open the networks database!\n";
+      
     my @network_setting = split(/[\/ ]/, $networks_db->local_access_spec('private'));
     my $remote_addr = NetAddr::IP->new( $ENV\{'REMOTE_ADDR'\} );
     if( $remote_addr->within( new NetAddr::IP @network_setting[1], @network_setting[2] ) ) \{
