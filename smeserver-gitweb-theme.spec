@@ -1,6 +1,6 @@
 %define name smeserver-gitweb-theme
 %define version 1.0.0
-%define release 3
+%define release 4
 Summary: GitHub inspired look and feel for smeserver-gitweb
 Name: %{name}
 Version: %{version}
@@ -38,6 +38,13 @@ rm -f %{name}-%{version}-filelist
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+echo "Expanding gitweb.conf template ..."
+/sbin/e-smith/expand-template /etc/gitweb.conf
+echo "Expanding web server template ..."
+/sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
+/etc/rc7.d/S86httpd-e-smith sighup
 
 %files -f %{name}-%{version}-filelist
 %defattr(-,root,root)
