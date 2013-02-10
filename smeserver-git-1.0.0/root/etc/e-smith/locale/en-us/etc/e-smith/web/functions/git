@@ -90,8 +90,8 @@
   </entry>
   
   <entry>
-  	<base>GIT_REMOVE_TITLE</base>
-	  <trans>Remove Git Repository</trans>
+    <base>GIT_REMOVE_TITLE</base>
+    <trans>Remove Git Repository</trans>
   </entry>
     
   <entry>
@@ -144,7 +144,7 @@
 
   <entry>
     <base>GIT_REPOSITORY_NAME</base>
-    <trans>Repository Name</trans>
+    <trans>Repository Name / Clone URL</trans>
   </entry>
 
   <entry>
