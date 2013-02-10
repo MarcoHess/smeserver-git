@@ -50,6 +50,7 @@
   use esmith::ConfigDB;      # General smeserver-git configuration
   use esmith::NetworksDB;    # Get the network IP address configuration
   use esmith::AccountsDB;    # Collect users that are members of a group
+  use esmith::DomainsDB;     # 
   use esmith::GitDB;         # Contains all git repositories configuration data
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
@@ -59,11 +60,11 @@
     die "Couldn't open ConfigDB\n";
 
   my $status = $git{'status'} || "disabled";
-  return "    # git is disabled.\nuse 'config setprop git status enabled' to enable HTTP access for git on your server.\n"
+  return "    # git is disabled.\n    # use 'config setprop git status enabled' to enable HTTP access for git on your server.\n"
     unless $status eq 'enabled';
 
   my $access = $git{'gitweb_access_from'} || "disabled";
-  return "    # no gitweb_access_from setting for git defined!\nuse 'config setprop git gitweb_access_from [local|internet]' to set network access level for gitweb.\n"
+  return "    # no gitweb_access_from setting for git defined!\n    # use 'config setprop git gitweb_access_from [local|internet]' to set network access level for gitweb.\n"
     if $access eq 'disabled';
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
@@ -267,7 +268,7 @@
     $OUT .= "      Allow from     $gitweb_allow\n";
     $OUT .= "    </Directory>\n\n";
   } else {
-    $OUT .= "    # Gitweb disabled or not installed\n";
+    $OUT .= "    # Gitweb disabled or not installed\n\n";
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
@@ -315,14 +316,15 @@
     #~~~ PULL Access Setup
     
     $OUT .= "    <Location \"$gitpath/$git_repository.git\"> # for PULL access to $gitpath/$git_repository.git\n\n";
-    $OUT .= "      SSLRequireSSL\n\n";
 
     if( $effective_pull_users ) {
       $OUT .= "      # PULL Access Control\n";
       $OUT .= "      AuthType      Basic\n";
       $OUT .= "      AuthExternal  pwauth\n";
       $OUT .= "      AuthName      \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!"). ")\"\n";
-      $OUT .= "      Require user  $effective_pull_push_users\n";
+      $OUT .= "      Require user  $effective_pull_push_users\n\n";
+      $OUT .= "      # Non-Anonymous PULL requires SSL\n";
+      $OUT .= "      SSLRequireSSL\n\n";
     } else {
       $OUT .= "      # Anoymous Pull Access\n";
     }
@@ -344,14 +346,15 @@
     #                        git-receive-pack items that Git requests when pushing.
     
     $OUT .= "    <Location \"/push$gitpath/$git_repository.git\">  # for PUSH access to $gitpath/$git_repository.git\n\n";
-    $OUT .= "      SSLRequireSSL\n\n";
 
     if( $effective_push_users ) {
       $OUT .= "      # PUSH Access Control\n";
       $OUT .= "      AuthType      Basic\n";
       $OUT .= "      AuthExternal  pwauth\n";
       $OUT .= "      AuthName      \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESC   RIPTION NOT CONFIGURED!"). ")\"\n";
-      $OUT .= "      Require user  $effective_push_users\n";
+      $OUT .= "      Require user  $effective_push_users\n\n";
+      $OUT .= "      # Non-Anonymous PUSH requires SSL\n";
+      $OUT .= "      SSLRequireSSL\n\n";
     } else {
       $OUT .= "      # Anoymous PUSH Access\n";
     }
