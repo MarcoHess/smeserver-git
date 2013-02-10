@@ -157,3 +157,11 @@ system("/bin/chown", "-R", "admin:www", "/home/e-smith/files/git/$gitRepositoryN
   or die "Could not change ownership of /home/e-smith/files/git/$gitRepositoryName.git";
 
 chmod 02770, ".";
+
+# Ensure that the git repository database is readable by the web server.
+system("/bin/chmod", "644", "/home/e-smith/db/git") == 0
+  or die "Could not change permissions on /home/e-smith/db/git";
+
+# Ensure that the networks database is readable by the web server.
+system("/bin/chmod", "644", "/home/e-smith/db/networks") == 0
+  or die "Could not change permissions on /home/e-smith/db/networks";
