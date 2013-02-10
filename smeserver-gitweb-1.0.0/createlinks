@@ -1,0 +1,14 @@
+#!/usr/bin/perl -w
+
+use esmith::Build::CreateLinks qw(:all);
+use File::Basename;
+
+# Domain Modify
+# -------------
+
+for my $event ( qw( domain-modify ) )
+{
+  safe_symlink("sigusr1", "root/etc/e-smith/events/$event/services2adjust/httpd-e-smith");
+  templates2events("/etc/gitweb.conf", $event)
+  templates2events("/etc/httpd/conf/httpd.conf", $event)
+}
