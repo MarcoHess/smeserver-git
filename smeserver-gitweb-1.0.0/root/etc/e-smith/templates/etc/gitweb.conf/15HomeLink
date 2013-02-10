@@ -10,10 +10,10 @@
 
   my $SystemName = $config_db->get("SystemName")->value;
   my $DomainName = $config_db->get("DomainName")->value;
-  my $GitWebHomeLink = "https://" . $SystemName . "." . $DomainName . "/git"; 
+  my $GitWebHomeLink = $SystemName . "." . $DomainName . "/git"; 
 
   $OUT = "\n";
   $OUT .= "# Home Link:\n";
-  $OUT .= "\$home_link = \"" . $GitWebHomeLink . "\"\;\n";
-  $OUT .= "\$home_link_str = \""  . $GitWebHomeLink . "\"\;\n";
+  $OUT .= "\$home_link = \"" . "https://" . $GitWebHomeLink . "\"\;\n";
+  $OUT .= "\$home_link_str = \"" . $GitWebHomeLink . "\"\;\n";
 }
