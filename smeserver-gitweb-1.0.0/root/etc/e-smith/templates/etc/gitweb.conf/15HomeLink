@@ -12,7 +12,7 @@
   my $DomainName = $config_db->get("DomainName")->value;
   my $GitWebHomeLink = "https://" . $SystemName . "." . $DomainName . "/git"; 
 
-  $OUT = "";
+  $OUT = "\n";
   $OUT .= "# Home Link:\n";
   $OUT .= "\$home_link = \"" . $GitWebHomeLink . "\"\;\n";
   $OUT .= "\$home_link_str = \""  . $GitWebHomeLink . "\"\;\n";
