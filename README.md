@@ -29,3 +29,5 @@ Iassues/Bugs
 * After delete of a repository, the Git database (/home/e-smith/db/git) 
   becomes unreadable. It needs chmod a+r to be readable by the web server.
 * Error messages about unreadble Git database it Gitweb could be improved.
+* GitWeb home URl does not work when the name can not be resolved. Needs an option
+  to set to IP address instead.
