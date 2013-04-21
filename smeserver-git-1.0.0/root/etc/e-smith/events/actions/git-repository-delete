@@ -65,11 +65,16 @@ die "'$gitRepositoryToDelete' is not an Git repository that is marked for deleti
 my $GitRepositoryDirectory = "/home/e-smith/files/git/$gitRepositoryToDelete.git";
 if( -d $GitRepositoryDirectory )
 {
+  # Clean up the directory tree
   rmtree( $GitRepositoryDirectory );
   if( -e $GitRepositoryDirectory )
   {
     warn "Could not remove Git repository in $GitRepositoryDirectory\n";
   }
+  
+  # Clean up the entry from the Git database. 
+  # This allows new repos of the same name to be created again.
+  $git_db->delete( $gitRepositoryToDelete )
 }
 else
 {
