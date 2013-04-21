@@ -3,7 +3,7 @@
 # vim: ft=perl ts=2 sw=2 et:
 #----------------------------------------------------------------------
 #
-# Copyright (C) 2012 - Marco Hess <marco.hess@through-ip.com>
+# Copyright (C) 2012-2013 - Marco Hess <marco.hess@through-ip.com>
 #
 # This file is part of the "Git Repositories" panel in the
 # SME Server server-manager panel to configure git repositories.
