@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 32
+%define release 33
 Summary: Centralised Git repositories with setup and configuration through SME Server admin panels.
 Name: %{name}
 Version: %{version}
@@ -27,6 +27,9 @@ installes and enables the git server on the current host like in
 host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
+* Sun May 21 2013 Marco Hess <marco.hess@through-ip.com> 1.0.0-33
+- Set permissions on git repository databaase for GitWeb access also on upgrade install.
+  
 * Sun May 21 2013 Marco Hess <marco.hess@through-ip.com> 1.0.0-32
 - Fixed a problem in the repository delete script where File::Path is needed
   to reference rmtree.
@@ -70,32 +73,33 @@ rm -f %{name}-%{version}-filelist
 rm -rf $RPM_BUILD_ROOT
 
 %post
-echo "--------------------------------------------------------------------------------------------"
+echo "---------------------------------------------------------"
 if [ "$1" = "1" ] ; then
   echo "Initial installation:"
   echo " - Ensuring git repositories configuration database exist ..."
   touch /home/e-smith/db/git
-  chmod 664 /home/e-smith/db/git
   echo " - Ensuring git repositories root directory exist with the right permissions ..."
   mkdir -p /home/e-smith/files/git
-  chown admin:www /home/e-smith/files/git
   chmod 770 /home/e-smith/files/git
   chmod g+s /home/e-smith/files/git
   echo "Rebuilding server-manager ..."
   /sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
   /etc/e-smith/events/actions/navigation-conf
 fi
+echo " - Ensuring git repositories configuration database has the right permissions ..."
+chmod 664 /home/e-smith/db/git
+chown admin:www /home/e-smith/files/git
 /etc/rc7.d/S86httpd-e-smith sighup
-echo "--------------------------------------------------------------------------------------------"
+echo "---------------------------------------------------------"
 
 %postun
 if [ "$1" = "0" ] ; then
-  echo "--------------------------------------------------------------------------------------------"
+  echo "---------------------------------------------------------"
   echo "Final Uninstall:"
   echo "  smeserver-git has been removed but the git repositories and the git config database are left in place ..."
   echo "  To remove the git repositories, use: 'rm -rf /home/e-smith/files/git'"
   echo "  To remove the git config database, use: 'rm -rf /home/e-smith/db/git'"
-  echo "--------------------------------------------------------------------------------------------"
+  echo "---------------------------------------------------------"
 fi
 
 %files -f %{name}-%{version}-filelist
