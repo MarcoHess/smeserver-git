@@ -138,7 +138,13 @@
   }
     
   $OUT .= "    # Setup password authentication method\n";
-  $OUT .= "    AddExternalAuth       pwauth /usr/lib/httpd/modules/pwauth\n";
+  if( -e "/usr/lib64/httpd/modules/pwauth" ) {
+    $OUT .= "    # 64-bit version\n";
+    $OUT .= "    AddExternalAuth       pwauth /usr/lib64/httpd/modules/pwauth\n";
+  } else {
+    $OUT .= "    # 32-bit version\n";
+    $OUT .= "    AddExternalAuth       pwauth /usr/lib/httpd/modules/pwauth\n";
+  }
   $OUT .= "    SetExternalAuthMethod pwauth pipe\n";
   $OUT .= "\n";
 
