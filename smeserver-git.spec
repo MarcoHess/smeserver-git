@@ -27,7 +27,7 @@ installes and enables the git server on the current host like in
 host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
-* Sun 21 May 2013 Marco Hess <marco.hess@through-ip.com> 1.0.0-31
+* Sun May 21 2013 Marco Hess <marco.hess@through-ip.com> 1.0.0-31
 - Changed the repository-delete script to ensure the SME Git database 
   permissions are Ok for use by GitWeb after a delete.
 - Ensure that on 64-bit systems we use /usr/lib64/httpd/modules/pwauth
