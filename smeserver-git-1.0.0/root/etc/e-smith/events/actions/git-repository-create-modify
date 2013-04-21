@@ -40,6 +40,9 @@ $ENV{'PATH'} = "/bin";
 my $event             = $ARGV [0];
 my $gitRepositoryName = $ARGV [1];
 
+die "event argument missing" 
+  unless defined ($event);
+
 die "gitRepositoryName argument missing" 
   unless defined ($gitRepositoryName);
 
@@ -48,7 +51,7 @@ die "gitRepositoryName argument missing"
 my $git_db = esmith::GitDB->open_ro();
 
 my $repository = $git_db->get($gitRepositoryName) or 
-	die "Couldn't find $gitRepositoryName record in git database\n";
+  die "Couldn't find $gitRepositoryName record in SME Server Git database\n";
   
 die "'$gitRepositoryName' is not an Git repository; git-repository-modify event failed.\n"
   unless ($repository->prop('type') eq 'repository');
