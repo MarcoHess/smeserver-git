@@ -29,6 +29,7 @@ package esmith;
 use strict;
 use Errno;
 use File::Find;
+use File::Path;
 use esmith::util;
 use esmith::templates;
 use esmith::GitDB;
@@ -54,7 +55,7 @@ die "Invalid event: \"$event\". Expecting \"git-repository-delete\"\n"
 my $git_db = esmith::GitDB->open_ro();
 
 my $repository = $git_db->get($gitRepositoryToDelete) or 
-	die "Couldn't find $gitRepositoryToDelete record in SME Server Git database\n";
+  die "Couldn't find $gitRepositoryToDelete record in SME Server Git database\n";
   
 die "'$gitRepositoryToDelete' is not an Git repository that is marked for deletion; git-repository-delete event failed.\n"
   unless ($repository->prop('type') eq 'repository-deleted');
