@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 30
+%define release 31
 Summary: Centralised Git repositories with setup and configuration through SME Server admin panels.
 Name: %{name}
 Version: %{version}
@@ -27,6 +27,11 @@ installes and enables the git server on the current host like in
 host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
+* Sun 21 May 2013 Marco Hess <marco.hess@through-ip.com> 1.0.0-31
+- Changed the repository-delete script to ensure the SME Git database 
+  permissions are Ok for use by GitWeb after a delete.
+- Ensure that on 64-bit systems we use /usr/lib64/httpd/modules/pwauth
+  
 * Sat Jul 21 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
 - Ensure git database is present in /home/e-smith/db
 - Create default config database entries for 'git'
