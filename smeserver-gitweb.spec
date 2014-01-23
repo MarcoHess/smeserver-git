@@ -1,6 +1,6 @@
 %define name smeserver-gitweb
 %define version 1.0.0
-%define release 11
+%define release 12
 Summary: GitWeb is a web based Git repository viewer on SME Server
 Name: %{name}
 Version: %{version}
@@ -24,6 +24,9 @@ AutoReqProv: no
 HTTP access to https://git.host.com provides a gitweb view of the repositories.
 
 %changelog
+* Fri Jan 24 2014 Marco Hess <marco.hess@through-ip.com> 1.0.0-12
+- Added support for displaying a clone URL.
+
 * Mon Jul 23 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
 - Setup default config parameters for gitweb as a service
 - Removed HTTP template as this is shared with smeserver-git
