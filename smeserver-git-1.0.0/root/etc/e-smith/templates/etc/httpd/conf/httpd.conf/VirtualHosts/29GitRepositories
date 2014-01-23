@@ -115,8 +115,33 @@
   my $GitRepositoryRoot = "/home/e-smith/files/git";
   
   # Installation location of the gitweb executables
-  my $GitWebRoot        = "/usr/share/gitweb";
-  
+  # Location seems to have shifted between git 1.7 and git 1.8
+
+  my $GitWebRoot = "";
+  if( -e "/usr/share/gitweb/gitweb.cgi" ) {
+    $GitWebRoot = "/usr/share/gitweb";
+  }
+  elsif( -e "/var/www/git/gitweb.cgi" {
+    $GitWebRoot = "/var/www/git";
+  }
+  else {
+    die "Couldn't find 'gitweb.cgi'\n";
+  }
+ 
+  # Installation location of the git-http-backend executables
+  # Location seems to have shifted between git 1.7 and git 1.8
+
+  my $GitHttpBackendPath = "";
+  if( -e "/usr/libexec/git-core/git-http-backend" ) {
+    $GitHttpBackendPath = "/usr/libexec/git-core";
+  }
+  elsif( -e "/usr/bin/git-http-backend" {
+    $GitHttpBackendPath = "/usr/bin";
+  }
+  else {
+    die "Couldn't find 'git-http-backend'\n";
+  }
+ 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
   #~~~ Global Git Configuration
 
@@ -181,7 +206,7 @@
   $OUT .= "                                          \[0-9a-f\]\{2\}/\[0-9a-f\]\{38\} \| \\\n";
   $OUT .= "                                          pack/pack-\[0-9a-f\]\{40\}\\.\(pack|idx\)\) \| \\\n";
   $OUT .= "                                 git-\(upload\|receive\)-pack\)\)\$\" \\\n";
-  $OUT .= "            /usr/libexec/git-core/git-http-backend/\$1\n";
+  $OUT .= "            $GitHttpBackendPath/git-http-backend/\$1\n";
   $OUT .= "\n";
 
   $OUT .= "    # In this second one we catch all the normal\n";
@@ -193,7 +218,7 @@
   $OUT .= "                                     \[0-9a-f\]\{2\}/\[0-9a-f\]\{38\} \| \\\n";
   $OUT .= "                                     pack/pack-\[0-9a-f\]\{40\}\\.\(pack|idx\)\) \| \\\n";
   $OUT .= "                            git-\(upload\|receive\)-pack\)\)\$\" \\\n";
-  $OUT .= "            /usr/libexec/git-core/git-http-backend/\$1\n";
+  $OUT .= "            $GitHttpBackendPath/git-http-backend/\$1\n";
   $OUT .= "\n";
 
   $OUT .= "    # Access permissions for the git root directory\n";
@@ -205,7 +230,7 @@
   $OUT .= "\n";
 
   $OUT .= "    # Access permissions for git backend scripts\n";
-  $OUT .= "    <Directory /usr/libexec/git-core>\n";
+  $OUT .= "    <Directory $GitHttpBackendPath>\n";
   $OUT .= "      Options        ExecCGI Indexes\n";
   $OUT .= "      Order          Allow,Deny\n";
   $OUT .= "      Allow from     All\n";
