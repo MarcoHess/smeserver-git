@@ -1,0 +1,16 @@
+{
+  # Setup the base URL
+
+  use esmith::ConfigDB;
+
+  my $config_db = esmith::ConfigDB->open_ro() or
+    die "Couldn't open ConfigDB\n";
+
+  my $SystemName    = $config_db->get("SystemName")->value;
+  my $DomainName    = $config_db->get("DomainName")->value;
+  my $GitWebBaseUrl = "https://" . $SystemName . "." . $DomainName . "/git";
+
+  $OUT  = "";
+  $OUT .= "# Set the list of git base URLs to fetch project from\n";
+  $OUT .= "\@git_base_url_list = \"" . $GitWebBaseUrl . "\"\;\n\n";
+}
