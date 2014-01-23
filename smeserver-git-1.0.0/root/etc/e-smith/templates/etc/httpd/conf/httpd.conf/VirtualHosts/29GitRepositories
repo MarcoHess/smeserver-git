@@ -121,7 +121,7 @@
   if( -e "/usr/share/gitweb/gitweb.cgi" ) {
     $GitWebRoot = "/usr/share/gitweb";
   }
-  elsif( -e "/var/www/git/gitweb.cgi" {
+  elsif( -e "/var/www/git/gitweb.cgi" ) {
     $GitWebRoot = "/var/www/git";
   }
   else {
@@ -135,7 +135,7 @@
   if( -e "/usr/libexec/git-core/git-http-backend" ) {
     $GitHttpBackendPath = "/usr/libexec/git-core";
   }
-  elsif( -e "/usr/bin/git-http-backend" {
+  elsif( -e "/usr/bin/git-http-backend" ) {
     $GitHttpBackendPath = "/usr/bin";
   }
   else {
