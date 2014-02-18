@@ -368,7 +368,7 @@
       $OUT .= "      Allow         from $allow_from_network\n";
       $OUT .= "      Satisfy       All\n";
     } else {
-      $OUT .= "      # Internet access\n";
+      $OUT .= "      # Internet access enabled\n";
     }
     $OUT .= "\n    </Location> # $gitpath/$git_repository.git\n\n";
 
@@ -398,7 +398,7 @@
       $OUT .= "      Allow         from $allow_from_network\n";
       $OUT .= "      Satisfy       All\n";
     } else {
-      $OUT .= "      # Internet access\n";
+      $OUT .= "      # Internet access enabled\n";
     }
     $OUT .= "\n    </Location> # /push$gitpath/$git_repository.git\n\n";
   }
