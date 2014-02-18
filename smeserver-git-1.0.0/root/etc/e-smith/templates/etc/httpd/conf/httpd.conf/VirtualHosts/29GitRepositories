@@ -19,8 +19,8 @@
   # 2. `gitweb`
   #    http://repo.or.cz/w/alt-git.git?a=blob_plain;f=gitweb/README
   #
-  # from https://git.jim.sh/jim/git-server-config.git
   # A lot of inspriration for this contrib came
+  # from https://git.jim.sh/gitweb/README.html
   #
   # Also see Scott Chacon's "Smart HTTP Transport"
   # http://progit.org/2010/03/04/smart-http.html
