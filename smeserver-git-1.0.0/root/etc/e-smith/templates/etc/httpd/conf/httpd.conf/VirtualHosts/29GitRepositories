@@ -222,7 +222,7 @@
   $OUT .= "\n";
 
   $OUT .= "    # Access permissions for the git root directory\n";
-  $OUT .= "    <Directory $GitRepositoryRoot>\n";
+  $OUT .= "    <Directory \"$GitRepositoryRoot\">\n";
   $OUT .= "      Options        ExecCGI\n";
   $OUT .= "      Order          Allow,Deny\n";
   $OUT .= "      Allow from     All\n";
@@ -230,7 +230,7 @@
   $OUT .= "\n";
 
   $OUT .= "    # Access permissions for git backend scripts\n";
-  $OUT .= "    <Directory $GitHttpBackendPath>\n";
+  $OUT .= "    <Directory \"$GitHttpBackendPath\">\n";
   $OUT .= "      Options        ExecCGI Indexes\n";
   $OUT .= "      Order          Allow,Deny\n";
   $OUT .= "      Allow from     All\n";
@@ -284,7 +284,7 @@
 #    $OUT .= "\n";
 
     $OUT .= "    # Access permissions for gitweb scripts\n";
-    $OUT .= "    <Directory $GitWebRoot>\n";
+    $OUT .= "    <Directory \"$GitWebRoot\">\n";
     $OUT .= "      Options        ExecCGI\n";
     $OUT .= "      AllowOverride  None\n";
     $OUT .= "      AddHandler     cgi-script .cgi\n";
@@ -295,7 +295,7 @@
 
     if( $gitweb_theme eq 'enabled' ) {
       $OUT .= "    # Access permissions for additional gitweb theme files\n";
-      $OUT .= "    <Directory /etc/e-smith/web/common/gitweb>\n";
+      $OUT .= "    <Directory \"/etc/e-smith/web/common/gitweb\">\n";
       $OUT .= "      AllowOverride  None\n";
       $OUT .= "      Order          Allow,Deny\n";
       $OUT .= "      Allow from     $gitweb_allow\n";
