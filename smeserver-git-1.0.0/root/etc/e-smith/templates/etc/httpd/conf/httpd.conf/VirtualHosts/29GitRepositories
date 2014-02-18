@@ -2,41 +2,41 @@
   # Git Repositories Httpd Template
   #
   # This configures the Apache 2.x webserver to be able to function
-  # as a Git repository server using git-http-backend with gitweb 
+  # as a Git repository server using git-http-backend with gitweb
   # repository viewing.
   #
   # Required packages: git gitweb
-  #  
-  # This setup provides "dual URLS", where URL like 
+  #
+  # This setup provides "dual URLS", where URL like
   # <http://example.com/git/my_repository.git>
-  # loads Gitweb in the browser and the same URL 
+  # loads Gitweb in the browser and the same URL
   # can be used in commands like `git clone` and
   # `git remote add`.
-  # 
+  #
   # Please see documentation for:
   # 1. `git-http-backend`
   #    http://www.kernel.org/pub/software/scm/git/docs/git-http-backend.html
   # 2. `gitweb`
   #    http://repo.or.cz/w/alt-git.git?a=blob_plain;f=gitweb/README
   #
-  # A lot of inspriration for this contrib came 
   # from https://git.jim.sh/jim/git-server-config.git
+  # A lot of inspriration for this contrib came
   #
   # Also see Scott Chacon's "Smart HTTP Transport"
   # http://progit.org/2010/03/04/smart-http.html
   #
   # Access Rules:
-  # - Global:  * gitweb view from the Internet and the local 
+  # - Global:  * gitweb view from the Internet and the local
   #              network with public repositories
-  #            * repository read from the Internet 
+  #            * repository read from the Internet
   #              and the local network
   #            * repository write from the Internet
   #              but authenticated with HTTPS
   # - Local:   * accessible only from the local
   #              network (incl. gitweb)
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-  # Copyright (C) 2012 Marco Hess <marco.hess@through-ip.com>
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Copyright (C) 2012-2014 Marco Hess <marco.hess@through-ip.com>
   #
   # This file should not be edited. If you want to make changes to it
   # copy it to the /etc/e-smith/templates-custom directory and make
@@ -44,16 +44,16 @@
   # saved when the system is restored from a backup or configuration
   # changes are made.
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Libraries
-  
+
   use esmith::ConfigDB;      # General smeserver-git configuration
   use esmith::NetworksDB;    # Get the network IP address configuration
   use esmith::AccountsDB;    # Collect users that are members of a group
-  use esmith::DomainsDB;     # 
+  use esmith::DomainsDB;     #
   use esmith::GitDB;         # Contains all git repositories configuration data
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Minimal Base Configuration Requirements
 
   my $config_db = esmith::ConfigDB->open_ro() or
@@ -67,19 +67,19 @@
   return "    # no gitweb_access_from setting for git defined!\n    # use 'config setprop git gitweb_access_from [local|internet]' to set network access level for gitweb.\n"
     if $access eq 'disabled';
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-  #~~~ Open additional databases for configuring individual repositories  
-  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #~~~ Open additional databases for configuring individual repositories
+
   my $networks_db = esmith::NetworksDB->open_ro() or
     die "Couldn't open NetworksDB\n";
-    
+
   my $accounts_db = esmith::AccountsDB->open_ro() or
     die "Couldn't open AccountsDB\n";
-  
+
   my $git_db = esmith::GitDB->open_ro() or
     die "Couldn't open GitDB\n";
-    
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Option Configuration
 
   my $debugging         = $git{'debugging'}        || "disabled";
@@ -94,10 +94,10 @@
   if( $git{'GitPath'} ) {
     $gitpath = "/" . $git{'GitPath'};
   }
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Gitweb default access permissions for viewing
-  
+
   my $gitweb_allow = '127.0.0.1'; # Catch incorrect values, including empty ones
   # Setup the rules from which address range we allow access
   if( $git{'gitweb_access_from'} ) {
@@ -105,15 +105,15 @@
       $gitweb_allow = 'All';
     } elsif ($git{'gitweb_access_from'} eq 'local') {
       $gitweb_allow = $localAccess;
-    } 
+    }
   }
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Default installation locations
 
   # Root of the git repositories directory tree.
   my $GitRepositoryRoot = "/home/e-smith/files/git";
-  
+
   # Installation location of the gitweb executables
   # Location seems to have shifted between git 1.7 and git 1.8
 
@@ -127,7 +127,7 @@
   else {
     die "Couldn't find 'gitweb.cgi'\n";
   }
- 
+
   # Installation location of the git-http-backend executables
   # Location seems to have shifted between git 1.7 and git 1.8
 
@@ -141,8 +141,8 @@
   else {
     die "Couldn't find 'git-http-backend'\n";
   }
- 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Global Git Configuration
 
   $OUT .= "\n";
@@ -152,7 +152,7 @@
   $OUT .= "    # Enable rewriting (may have been enabled earlier)\n";
   $OUT .= "    RewriteEngine   on\n";
   $OUT .= "\n";
-  
+
   if( $debugging eq 'enabled' ) {
     $OUT .= "    # Set logging options - mainly for debugging\n";
     $OUT .= "    LogLevel        debug\n";
@@ -161,7 +161,7 @@
     $OUT .= "    RewriteLogLevel 9\n";
     $OUT .= "\n";
   }
-    
+
   $OUT .= "    # Setup password authentication method\n";
   if( -e "/usr/lib64/httpd/modules/pwauth" ) {
     $OUT .= "    # 64-bit version\n";
@@ -177,9 +177,9 @@
   $OUT .= "\n";
   $OUT .= "    SetEnv GIT_PROJECT_ROOT $GitRepositoryRoot\n";
   $OUT .= "    SetEnv GIT_HTTP_EXPORT_ALL\n";
-#  $OUT .= "    SetEnv REMOTE_USER REDIRECT_REMOTE_USER\n"; 
+#  $OUT .= "    SetEnv REMOTE_USER REDIRECT_REMOTE_USER\n";
   $OUT .= "\n";
- 
+
   $OUT .= "    # For access to git-receive-pack items (i.e. Git PUSH\n";
   $OUT .= "    # operations) rewrite the URL to an internal virtual\n";
   $OUT .= "    # push directory that can be handled in a separate\n";
@@ -193,7 +193,7 @@
   $OUT .= "    RewriteCond %\{REQUEST_URI\}  /git-receive-pack\$\n";
   $OUT .= "    RewriteRule ^\(.*\)\$          /push%\{REQUEST_URI\} [PT]\n";
   $OUT .= "\n";
-            
+
   $OUT .= "    # We use ScriptAliasMatch to match those URLs that\n";
   $OUT .= "    # git-http-backend can handle and forward the rest\n";
   $OUT .= "    # to gitweb. In this first one we catch the PUSH\n";
@@ -237,7 +237,7 @@
   $OUT .= "    </Directory>\n";
   $OUT .= "\n";
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Setup Gitweb and optional Github theme
 
   $OUT .= "    # ~~~ GITWEB ~~~\n\n";
@@ -298,12 +298,12 @@
       $OUT .= "      Allow from     $gitweb_allow\n";
       $OUT .= "    </Directory>\n\n";
     }
-    
+
   } else {
     $OUT .= "    # Gitweb disabled or not installed\n\n";
   }
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~ Setup access for individual Git repositories
 
   $OUT .= "    # ~~~ START OF GIT REPOSITORIES CONFIGURATION ~~~\n\n";
@@ -313,7 +313,7 @@
   {
     my $git_repository          = $repository->key;
     my %properties              = $repository->props;
-    
+
     # Retrieve the network access rules for the repository
     my $satisfy                 = 'All';
     my $allow_from_network = '127.0.0.1'; # Catch incorrect values, including empty ones
@@ -322,20 +322,20 @@
         $allow_from_network = 'All';
       } elsif ($properties{'allow_access_from'} eq 'local') {
         $allow_from_network = $localAccess;
-      } 
+      }
     }
 
     # Determine the effective users list from the listed groups and individual users
-    my $effective_push_users = $git_db->effective_users_list_from( $properties{'push_groups'}, 
-                                                                   $properties{'push_users'} ); 
-                                                                   
-    my $effective_pull_users = $git_db->effective_users_list_from( $properties{'pull_groups'},  
-                                                                   $properties{'pull_users'} ); 
-                                                                   
-    my $effective_pull_push_users = $git_db->effective_users_list_from( $properties{'push_groups'}, 
+    my $effective_push_users = $git_db->effective_users_list_from( $properties{'push_groups'},
+                                                                   $properties{'push_users'} );
+
+    my $effective_pull_users = $git_db->effective_users_list_from( $properties{'pull_groups'},
+                                                                   $properties{'pull_users'} );
+
+    my $effective_pull_push_users = $git_db->effective_users_list_from( $properties{'push_groups'},
                                                                    $properties{'push_users'},
-                                                                   $properties{'pull_groups'},  
-                                                                   $properties{'pull_users'} ); 
+                                                                   $properties{'pull_groups'},
+                                                                   $properties{'pull_users'} );
 
     $OUT .= "    # ~~~~~~~~~~~~~~~~~~~~~~~~\n";
     $OUT .= "    # Git Repository         : $gitpath/$git_repository.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!") . ")\n";
@@ -344,9 +344,9 @@
     $OUT .= "    #  - Effective PUSH Users: '" . ($effective_push_users || "Anonymous") . "' <= (" . ($properties{'push_groups'} || "none") . "/" . ($properties{'push_users'}  || "none") . ")\n";
     $OUT .= "    #  - Effective PULL/PUSH : '" . ($effective_pull_push_users || "Anonymous") . "'\n";
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~~~ PULL Access Setup
-    
+
     $OUT .= "    <Location \"$gitpath/$git_repository.git\"> # for PULL access to $gitpath/$git_repository.git\n\n";
 
     if( $effective_pull_users ) {
@@ -361,7 +361,7 @@
       $OUT .= "      # Anoymous Pull Access\n";
     }
     $OUT .= "\n";
-    if( $allow_from_network ne 'All' ) { 
+    if( $allow_from_network ne 'All' ) {
       $OUT .= "      # Restricted network access\n";
       $OUT .= "      Order         Deny,Allow\n";
       $OUT .= "      Deny          from All\n";
@@ -372,11 +372,11 @@
     }
     $OUT .= "\n    </Location> # $gitpath/$git_repository.git\n\n";
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-    #~~~ PUSH Access Setup - uses a virtual /push directory in the path that was 
-    #                        setup using previus RewriteCond rules looking for the 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~ PUSH Access Setup - uses a virtual /push directory in the path that was
+    #                        setup using previus RewriteCond rules looking for the
     #                        git-receive-pack items that Git requests when pushing.
-    
+
     $OUT .= "    <Location \"/push$gitpath/$git_repository.git\">  # for PUSH access to $gitpath/$git_repository.git\n\n";
 
     if( $effective_push_users ) {
@@ -391,7 +391,7 @@
       $OUT .= "      # Anoymous PUSH Access\n";
     }
     $OUT .= "\n";
-    if( $allow_from_network ne 'All' ) { 
+    if( $allow_from_network ne 'All' ) {
       $OUT .= "      # Restricted network access\n";
       $OUT .= "      Order         Deny,Allow\n";
       $OUT .= "      Deny          from All\n";
@@ -402,6 +402,6 @@
     }
     $OUT .= "\n    </Location> # /push$gitpath/$git_repository.git\n\n";
   }
-  
+
   $OUT .= "    # ~~~ END OF GIT REPOSITORIES CONFIGURATION ~~~\n\n";
 }
