@@ -242,6 +242,8 @@
 
   $OUT .= "    # ~~~ GITWEB ~~~\n\n";
   if( $gitweb eq 'enabled' ) {
+    $OUT .= "    # config getprop git GitWeb == enabled\n\n";
+
     $OUT .= "    # If HTTP:Authorization was send in the request,\n";
     $OUT .= "    # ensure we make it available as the HTTP_AUTHORIZATION\n";
     $OUT .= "    # environment variable for use in authentication\n";
@@ -267,7 +269,8 @@
 #    $OUT .= "    RewriteRule ^/$git_subdir/(.*\\.git/(?!/?(HEAD|info|objects|refs)).*)?\$ $gitpath/gitweb/gitweb.cgi%{REQUEST_URI} [L,PT]\n\n";
 
     if( $gitweb_theme eq 'enabled' ) {
-      $OUT .= "    # Overide gitweb CSS & JS file to enable a Github lookalike theme:\n";
+      $OUT .= "    # config getprop git GitWebTheme == enabled\n";
+      $OUT .= "    # Overide the standard gitweb CSS & JS file to enable the theme:\n";
       $OUT .= "    Alias  $gitpath/static/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
       $OUT .= "    Alias  $gitpath/static/gitweb.js       /etc/e-smith/web/common/gitweb/gitweb.js\n";
       $OUT .= "\n";
