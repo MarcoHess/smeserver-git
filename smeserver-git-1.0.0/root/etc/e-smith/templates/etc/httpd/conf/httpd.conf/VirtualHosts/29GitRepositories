@@ -256,7 +256,14 @@
     $OUT .= "    # Load configuration for Gitweb\n";
     $OUT .= "    SetEnv GITWEB_CONFIG /etc/gitweb.conf\n";
     $OUT .= "\n";
-  
+
+    $OUT .= "    # Ensure all /git access is using HTTPS\n";
+    $OUT .= "    RewriteRule ^/git(/.*|\$)    https://%{HTTP_HOST}/git\$1 [L,R]\n";
+    $OUT .= "    <Location \"/git\">\n";
+    $OUT .= "      SSLRequireSSL\n";
+    $OUT .= "    </Location>\n";
+    $OUT .= "\n";
+
 #    $OUT .= "    # Ensure we can browse the repo with http://server.com/git/repo.git\n";
 #    $OUT .= "    # instead of http://server.com/git?p=repo.git;a=summary.\n";
 #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
