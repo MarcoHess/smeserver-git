@@ -134,7 +134,7 @@ elsif ($event eq 'git-repository-modify')
   open(my $file, '>', "/home/e-smith/files/git/$gitRepositoryName.git/description");
   print $file $repository->prop('description') . "\n"; 
   
-  # Run git-update-server-info
+  # Goto git repository
   chdir "/home/e-smith/files/git/$gitRepositoryName.git"
     or die "Could not chdir to /home/e-smith/files/git/$gitRepositoryName.git";
 
@@ -142,9 +142,9 @@ elsif ($event eq 'git-repository-modify')
   system("/usr/bin/git", "config", "--replace-all", "hooks.mailinglist", $effective_pull_push_users ) == 0
     or die "Could not update 'hooks.mailinglist' in /home/e-smith/files/git/$gitRepositoryName.git";
 
-  # Run an update-server-info action for good measure
-  system("/usr/libexec/git-core/git-update-server-info") == 0
-    or die "Error running 'update-server-info' on repository /home/e-smith/files/git/$gitRepositoryName.git";
+  # Run a "git update-server-info" action for good measure
+  system("/usr/bin/git", "update-server-info") == 0
+    or die "Error running 'git-update-server-info' on repository /home/e-smith/files/git/$gitRepositoryName.git";
 }
 
 #------------------------------------------------------------
