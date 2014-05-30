@@ -1,6 +1,6 @@
 %define name smeserver-git
 %define version 1.0.0
-%define release 36
+%define release 37
 Summary: Centralised Git repositories with setup and configuration through SME Server admin panels.
 Name: %{name}
 Version: %{version}
@@ -27,6 +27,11 @@ installes and enables the git server on the current host like in
 host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
+* Fri May 30 2014 Marco Hess <marco.hess@through-ip.com> 1.0.0-37
+- Fixed the HTTPS redirection loop. HTTPS redirection is now only done on the HTTP part of of
+  the web server configuration and the full Git configuration part is only done in the HTTPS
+  section.
+
 * Tue May 27 2014 Marco Hess <marco.hess@through-ip.com> 1.0.0-36
 - Changed how git update-server-info is run as the location of the executable changed in git 1.8.
 
