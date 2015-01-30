@@ -117,8 +117,8 @@
   # Installation location of the gitweb executables
   # Location seems to have shifted between git 1.7 and git 1.8
 
+  my $GitWebRoot = "";
   if( $gitweb eq 'enabled' ) {
-    my $GitWebRoot = "";
     if( -e "/usr/share/gitweb/gitweb.cgi" ) {
       $GitWebRoot = "/usr/share/gitweb";
     }

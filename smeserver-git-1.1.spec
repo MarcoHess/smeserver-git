@@ -32,6 +32,7 @@ host.com/git. Repositories are then available as https://host.com/git/gitrepo.gi
 - Moved /usr/lib/perl5/site_perl to /usr/share/perl5/vendor_perl.
 - Fixed pwauth setup.
 - Added AuthBasicProvider external in authentication setup.
+- Fixed GitWebRoot variable scope.
 
 * Fri May 30 2014 Marco Hess <marco.hess@through-ip.com> 1.0.0-37
 - Fixed the HTTPS redirection loop. HTTPS redirection is now only done on the HTTP part of of
