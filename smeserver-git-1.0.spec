@@ -23,7 +23,7 @@ smeserver-git enables centralised git repositories on an SME server and enables
 access to these repositories through HTTP/HTTPS. Repositories are created and
 managed through a server-manager panel that also configures the access permissions
 to the repositories based on the existing SME users and groups. The package
-installes and enables the git server on the current host like in
+installs and enables the git server on the current host like in
 host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
@@ -89,7 +89,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 echo "---------------------------------------------------------"
-if [ "$1" = "1" ] ; then
+if [ $1 -eq 1 ] ; then
   echo "Initial installation:"
   echo " - Ensuring git repositories configuration database exist ..."
   touch /home/e-smith/db/git
@@ -97,7 +97,7 @@ if [ "$1" = "1" ] ; then
   mkdir -p /home/e-smith/files/git
   chmod 770 /home/e-smith/files/git
   chmod g+s /home/e-smith/files/git
-  echo "Rebuilding server-manager ..."
+  echo " - Rebuilding server-manager ..."
   /sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
   /etc/e-smith/events/actions/navigation-conf
 fi
@@ -108,12 +108,15 @@ chown admin:www /home/e-smith/files/git
 echo "---------------------------------------------------------"
 
 %postun
-if [ "$1" = "0" ] ; then
+if [ $1 -eq 0 ] ; then
   echo "---------------------------------------------------------"
-  echo "Final Uninstall:"
+  echo " - Rebuilding server-manager ..."
+  /sbin/e-smith/expand-template /etc/httpd/conf/httpd.conf
+  /etc/e-smith/events/actions/navigation-conf
+  echo " - Final Uninstall:"
   echo "  smeserver-git has been removed but the git repositories and the git config database are left in place ..."
-  echo "  To remove the git repositories, use: 'rm -rf /home/e-smith/files/git'"
-  echo "  To remove the git config database, use: 'rm -rf /home/e-smith/db/git'"
+  echo "  To manually remove the git repositories, use: 'rm -rf /home/e-smith/files/git'"
+  echo "  To manually remove the git config database, use: 'rm -rf /home/e-smith/db/git'"
   echo "---------------------------------------------------------"
 fi
 
