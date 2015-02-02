@@ -106,7 +106,7 @@ td, th {
   height: 50px;
   line-height: 50px;
   position: relative;
-  padding: 0 27px;
+  padding: 0 2.5%;
   margin-bottom: 20px;
   font-size: 20px;
   font-family: Helvetica, Arial, Freesans, Clean, sans-serif;
@@ -276,7 +276,7 @@ th .header {
 
 .projsearch {
   position: absolute;
-  right: 4%;
+  right: 2.5%;
   top: 15px;
 }
 
