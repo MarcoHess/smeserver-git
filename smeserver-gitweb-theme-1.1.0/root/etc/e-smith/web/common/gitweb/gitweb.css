@@ -161,7 +161,7 @@ td, th {
   color: #666;
   display: inline;
   float: left;
-  margin-left: 25px;
+  margin-left: 2.5%;
 }
 
 a.rss_logo {
@@ -187,7 +187,7 @@ a.rss_logo:hover {
 }
 
 .rss_logo {
-  margin-right: 25px;
+  margin-right: 2.5%;
   background: yellow;
 }
 
