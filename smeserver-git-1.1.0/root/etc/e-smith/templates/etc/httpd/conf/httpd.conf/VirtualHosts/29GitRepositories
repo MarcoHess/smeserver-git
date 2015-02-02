@@ -319,7 +319,6 @@
         $OUT .= "      AllowOverride  None\n";
         $OUT .= "      Order          Allow,Deny\n";
         $OUT .= "      Allow from     $gitweb_allow\n";
-        # $OUT .= "      Require        ip $gitweb_allow\n";
         $OUT .= "    </Directory>\n\n";
       }
     } else {
