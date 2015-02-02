@@ -1,14 +1,16 @@
 {
   # Setup the site name
+  # Allow override with: config setprop git SystemName <name>
+  #              and/or: config setprop git DomainName <name>
+  # Otherwise it default to the primary system and domain name
 
   use esmith::ConfigDB;
 
   my $config_db = esmith::ConfigDB->open_ro() or
     die "Couldn't open ConfigDB\n";
 
-  my $SystemName = $config_db->get("SystemName")->value;
-  my $DomainName = $config_db->get("DomainName")->value;
-
+  my $SystemName = $git\{'SystemName'\} || $config_db->get("SystemName")->value;
+  my $DomainName = $git\{'DomainName'\} || $config_db->get("DomainName")->value;
   my $GitWebSiteName = $SystemName . "." . $DomainName;
 
   $OUT = "";

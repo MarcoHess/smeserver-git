@@ -1,6 +1,7 @@
 {
   # Setup the home link
-  # Allow override with: config setprop git Domain <name>
+  # Allow override with: config setprop git SystemName <name>
+  #              and/or: config setprop git DomainName <name>
   # Otherwise default to the primary system domain
  
   use esmith::ConfigDB;
@@ -8,8 +9,8 @@
   my $config_db = esmith::ConfigDB->open_ro() or
     die "Couldn't open ConfigDB\n";
 
-  my $SystemName = $config_db->get("SystemName")->value;
-  my $DomainName = $config_db->get("DomainName")->value;
+  my $SystemName = $git\{'SystemName'\} || $config_db->get("SystemName")->value;
+  my $DomainName = $git\{'DomainName'\} || $config_db->get("DomainName")->value;
   my $GitWebHomeLink = $SystemName . "." . $DomainName . "/git"; 
 
   $OUT  = "";
@@ -18,6 +19,6 @@
   $OUT .= "  <pre>\n";
   $OUT .= "    <code>git clone " . "https://" . $GitWebHomeLink . "/foo.git</code>\n";
   $OUT .= "  </pre>\n";
-  $OUT .= "  <a href=\"https://nobody\@" . $GitWebHomeLink . "\?reqauth=1\">Login</a> to see private repositories.\n";
+  $OUT .= "  <a href=\"https://nobody\@" . $GitWebHomeLink . "\?reqauth=1\">Force Authentication</a> to see private repositories.\n";
   $OUT .= "</div>\n";
 }
