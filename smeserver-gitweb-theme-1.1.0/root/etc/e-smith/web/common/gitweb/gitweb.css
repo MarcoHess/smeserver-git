@@ -199,7 +199,7 @@ a.rss_logo:hover {
 ---------------------------------------------------------------------------- */
 
 .index_include {
-  width: 98%;
+  width: 95%;
   margin: 0 auto 15px;
   background: -moz-linear-gradient(center top , #FFFFFF 0%, #F5F5F5 100%) repeat scroll 0 0 transparent;
   border: 1px solid #DFDFDF;
@@ -292,16 +292,22 @@ th .header {
 .list_head,
 .page_path,
 .search {
-  width: 99%;
+  width: 94%;
   background: #eaeaea;
   color: #545454;
   border: 1px solid #d8d8d8;
   padding: 5px;
-  margin: 2px;
+  margin: 0 auto 15px auto;
+}
+
 .list_head {
   display:none;
 }
 
+.index_include .page_nav {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .history {
