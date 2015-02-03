@@ -98,12 +98,13 @@ sub effective_users_list_from {
     if( $groups2 ) {
       push @groups, split ( /,/, $groups2 );
     }
-    my $accounts_db = esmith::AccountsDB->open;
+    my $accounts_db = esmith::AccountsDB->open_ro()
+      or die( "Failed to open Accounts database : $!. The database file may not be readable by this user.\n" );
     foreach my $group (@groups) {
       if( $group eq 'admin' ) {
         push @effective_users_list, 'admin';
       } elsif( $group eq 'shared' ) {
-        push @effective_users_list, $_->key foreach( $accounts_db->users );
+        push @effective_users_list, $_->key foreach( $accounts_db->users() );
       } else {
         my $record = $accounts_db->get($group);
         if ($record) {
