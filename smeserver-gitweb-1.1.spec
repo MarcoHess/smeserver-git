@@ -26,6 +26,7 @@ HTTP access to https://git.host.com provides a gitweb view of the repositories.
 %changelog
 * Fri Jan 30 2015 Marco Hess <marco.hess@through-ip.com> 1.1.0-0
 - Split spec package to version 1.1 for SME9
+- Fixed user authorisation for repositories viewable from internet
 
 * Fri Jan 24 2014 Marco Hess <marco.hess@through-ip.com> 1.0.0-12
 - Added support for displaying a clone URL.
