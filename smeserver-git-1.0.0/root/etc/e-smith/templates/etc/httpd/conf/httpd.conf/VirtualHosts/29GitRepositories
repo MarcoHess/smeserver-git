@@ -126,7 +126,7 @@
       $GitWebRoot = "/var/www/git";
     }
     else {
-      die "Couldn't find 'gitweb.cgi'\n";
+      die "Gitweb is enabled, but could not find 'gitweb.cgi'!\n";
     }
   }
 
@@ -159,7 +159,7 @@
     $OUT .= "      SSLRequireSSL\n";
     $OUT .= "    </Location>\n";
     $OUT .= "\n";
-    $OUT .= "    # ~~~ END OF GIT HTTP CONFIGURATION ~~~\n\n";
+    $OUT .= "    # ~~~ GIT HTTP CONFIGURATION END ~~~\n";
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -193,7 +193,7 @@
     $OUT .= "    SetExternalAuthMethod pwauth pipe\n";
     $OUT .= "\n";
 
-    $OUT .= "    # ~~~ GIT HTTPS BACKEND CONFIGURATION ~~~\n";
+    $OUT .= "    # ~~~ GIT BACKEND CONFIGURATION ~~~\n";
     $OUT .= "\n";
     $OUT .= "    SetEnv GIT_PROJECT_ROOT $GitRepositoryRoot\n";
     $OUT .= "    SetEnv GIT_HTTP_EXPORT_ALL\n";
@@ -243,7 +243,7 @@
 
     $OUT .= "    # Access permissions for the git root directory\n";
     $OUT .= "    <Directory \"$GitRepositoryRoot\">\n";
-    $OUT .= "      Options        ExecCGI\n";
+    $OUT .= "      Options        +ExecCGI\n";
     $OUT .= "      Order          Allow,Deny\n";
     $OUT .= "      Allow from     All\n";
     $OUT .= "    </Directory>\n";
@@ -251,7 +251,7 @@
 
     $OUT .= "    # Access permissions for git backend scripts\n";
     $OUT .= "    <Directory \"$GitHttpBackendPath\">\n";
-    $OUT .= "      Options        ExecCGI Indexes\n";
+    $OUT .= "      Options        +ExecCGI +Indexes\n";
     $OUT .= "      Order          Allow,Deny\n";
     $OUT .= "      Allow from     All\n";
     $OUT .= "    </Directory>\n";
@@ -260,74 +260,74 @@
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~~~ Setup Gitweb and optional Github theme
 
-    $OUT .= "    # ~~~ GITWEB ~~~\n\n";
+    $OUT .= "    # ~~~ GITWEB CONFIGURATION ~~~\n\n";
     if( $gitweb eq 'enabled' ) {
-    $OUT .= "    # config getprop git GitWeb == enabled\n\n";
+      $OUT .= "    # config getprop git GitWeb == enabled\n\n";
 
-    $OUT .= "    # If HTTP:Authorization was send in the request,\n";
-    $OUT .= "    # ensure we make it available as the HTTP_AUTHORIZATION\n";
-    $OUT .= "    # environment variable for use in authentication\n";
-    $OUT .= "    # checks by gitweb.\n";
-    $OUT .= "\n";
-    $OUT .= "    RewriteCond %\{HTTP:Authorization\} ^(.+)\n";
-    $OUT .= "    RewriteRule .? - [e=HTTP_AUTHORIZATION:%1]\n";
-    $OUT .= "\n";
-
-    $OUT .= "    # Load configuration for Gitweb\n";
-    $OUT .= "    SetEnv GITWEB_CONFIG /etc/gitweb.conf\n";
-    $OUT .= "\n";
-
-    $OUT .= "    # Ensure all /git access is using HTTPS\n";
-    $OUT .= "    <Location \"/git\">\n";
-    $OUT .= "      SSLRequireSSL\n";
-    $OUT .= "    </Location>\n";
-    $OUT .= "\n";
-
-    #    $OUT .= "    # Ensure we can browse the repo with http://server.com/git/repo.git\n";
-    #    $OUT .= "    # instead of http://server.com/git?p=repo.git;a=summary.\n";
-    #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
-    #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
-    #    $OUT .= "    RewriteRule ^$gitpath\/gitweb.cgi\(\.\*\\.git)\$ $gitpath/gitweb.cgi\$1 [PT]\n";
-
-    #    $OUT .= "    RewriteCond %{REQUEST_URI} !=$gitpath/gitweb.*\n";
-    #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
-    #    $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
-    #    $OUT .= "    RewriteRule ^/$git_subdir/(.*\\.git/(?!/?(HEAD|info|objects|refs)).*)?\$ $gitpath/gitweb/gitweb.cgi%{REQUEST_URI} [L,PT]\n\n";
-
-    if( $gitweb_theme eq 'enabled' ) {
-      $OUT .= "    # config getprop git GitWebTheme == enabled\n";
-      $OUT .= "    # Overide the standard gitweb CSS & JS file to enable the theme:\n";
-      $OUT .= "    Alias  $gitpath/static/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
-      $OUT .= "    Alias  $gitpath/static/gitweb.js       /etc/e-smith/web/common/gitweb/gitweb.js\n";
+      $OUT .= "    # If HTTP:Authorization was send in the request,\n";
+      $OUT .= "    # ensure we make it available as the HTTP_AUTHORIZATION\n";
+      $OUT .= "    # environment variable for use in authentication\n";
+      $OUT .= "    # checks by gitweb.\n";
       $OUT .= "\n";
-    }
-    $OUT .= "    # Static & CGI files used by Gitweb. \n";
-    $OUT .= "    Alias        $gitpath                 $GitWebRoot\n";
-    $OUT .= "\n";
+      $OUT .= "    RewriteCond %\{HTTP:Authorization\} ^(.+)\n";
+      $OUT .= "    RewriteRule .? - [e=HTTP_AUTHORIZATION:%1]\n";
+      $OUT .= "\n";
 
-    #    $OUT .= "    # Serve HTML with gitweb. Use Alias to also allow serving required CSS and JS files.\n";
-    #    $OUT .= "    ScriptAlias  $gitpath                 $GitWebRoot/gitweb.cgi\n";
-    #    $OUT .= "\n";
+      $OUT .= "    # Load configuration for Gitweb\n";
+      $OUT .= "    SetEnv GITWEB_CONFIG /etc/gitweb.conf\n";
+      $OUT .= "\n";
 
-    $OUT .= "    # Access permissions for gitweb scripts\n";
-    $OUT .= "    <Directory \"$GitWebRoot\">\n";
-    $OUT .= "      Options        ExecCGI\n";
-    $OUT .= "      AllowOverride  None\n";
-    $OUT .= "      AddHandler     cgi-script .cgi\n";
-    $OUT .= "      DirectoryIndex gitweb.cgi\n";
-    $OUT .= "      Order          Allow,Deny\n";
-    $OUT .= "      Allow from     $gitweb_allow\n";
-    $OUT .= "    </Directory>\n\n";
+      $OUT .= "    # Ensure all /git access is using HTTPS\n";
+      $OUT .= "    <Location \"/git\">\n";
+      $OUT .= "      SSLRequireSSL\n";
+      $OUT .= "    </Location>\n";
+      $OUT .= "\n";
 
-    if( $gitweb_theme eq 'enabled' ) {
-      $OUT .= "    # Access permissions for additional gitweb theme files\n";
-      $OUT .= "    <Directory \"/etc/e-smith/web/common/gitweb\">\n";
+      # $OUT .= "    # Ensure we can browse the repo with http://server.com/git/repo.git\n";
+      # $OUT .= "    # instead of http://server.com/git?p=repo.git;a=summary.\n";
+      # $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
+      # $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
+      # $OUT .= "    RewriteRule ^$gitpath\/gitweb.cgi\(\.\*\\.git)\$ $gitpath/gitweb.cgi\$1 [PT]\n";
+ 
+      # $OUT .= "    RewriteCond %{REQUEST_URI} !=$gitpath/gitweb.*\n";
+      # $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
+      # $OUT .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
+      # $OUT .= "    RewriteRule ^/$git_subdir/(.*\\.git/(?!/?(HEAD|info|objects|refs)).*)?\$ $gitpath/gitweb/gitweb.cgi%{REQUEST_URI} [L,PT]\n\n";
+
+      if( $gitweb_theme eq 'enabled' ) {
+        $OUT .= "    # config getprop git GitWebTheme == enabled\n";
+        $OUT .= "    # Overide the standard gitweb CSS, JS and image files to enable the theme:\n";
+        $OUT .= "    Alias  $gitpath/static/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
+        $OUT .= "    Alias  $gitpath/static/git-favicon.png /etc/e-smith/web/common/gitweb/git-favicon.png\n";
+        $OUT .= "    Alias  $gitpath/static/git-logo.png    /etc/e-smith/web/common/gitweb/git-logo.png\n";
+        $OUT .= "\n";
+      }
+      $OUT .= "    # Static & CGI files used by Gitweb. \n";
+      $OUT .= "    Alias        $gitpath                 $GitWebRoot\n";
+      $OUT .= "\n";
+
+      #    $OUT .= "    # Serve HTML with gitweb. Use Alias to also allow serving required CSS and JS files.\n";
+      #    $OUT .= "    ScriptAlias  $gitpath                 $GitWebRoot/gitweb.cgi\n";
+      #    $OUT .= "\n";
+
+      $OUT .= "    # Access permissions for gitweb scripts\n";
+      $OUT .= "    <Directory \"$GitWebRoot\">\n";
+      $OUT .= "      Options        +ExecCGI\n";
       $OUT .= "      AllowOverride  None\n";
+      $OUT .= "      AddHandler     cgi-script .cgi\n";
+      $OUT .= "      DirectoryIndex gitweb.cgi\n";
       $OUT .= "      Order          Allow,Deny\n";
       $OUT .= "      Allow from     $gitweb_allow\n";
       $OUT .= "    </Directory>\n\n";
-    }
 
+      if( $gitweb_theme eq 'enabled' ) {
+        $OUT .= "    # Access permissions for additional gitweb theme files\n";
+        $OUT .= "    <Directory \"/etc/e-smith/web/common/gitweb\">\n";
+        $OUT .= "      AllowOverride  None\n";
+        $OUT .= "      Order          Allow,Deny\n";
+        $OUT .= "      Allow from     $gitweb_allow\n";
+        $OUT .= "    </Directory>\n\n";
+      }
     } else {
       $OUT .= "    # Gitweb disabled or not installed\n\n";
     }
@@ -335,7 +335,7 @@
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~~~ Setup access for individual Git repositories
 
-    $OUT .= "    # ~~~ START OF GIT REPOSITORIES CONFIGURATION ~~~\n\n";
+    $OUT .= "    # ~~~ GIT REPOSITORIES CONFIGURATION START ~~~\n\n";
 
     my @repositories = $git_db->get_all_by_prop('type' => 'repository');
     foreach my $repository (@repositories)
@@ -351,90 +351,89 @@
           $allow_from_network = 'All';
         } elsif ($properties{'allow_access_from'} eq 'local') {
           $allow_from_network = $localAccess;
+        }
       }
-    }
 
-    # Determine the effective users list from the listed groups and individual users
-    my $effective_push_users =
+      # Determine the effective users list from the listed groups and individual users
+      my $effective_push_users =
         $git_db->effective_users_list_from( $properties{'push_groups'},
                                             $properties{'push_users'} );
 
-    my $effective_pull_users =
+      my $effective_pull_users =
         $git_db->effective_users_list_from( $properties{'pull_groups'},
                                             $properties{'pull_users'} );
 
-    my $effective_pull_push_users =
+      my $effective_pull_push_users =
         $git_db->effective_users_list_from( $properties{'push_groups'},
                                             $properties{'push_users'},
                                             $properties{'pull_groups'},
                                             $properties{'pull_users'} );
 
-    $OUT .= "    # ~~~~~~~~~~~~~~~~~~~~~~~~\n";
-    $OUT .= "    # Git Repository         : $gitpath/$git_repository.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!") . ")\n";
-    $OUT .= "    #  - Allow access from   : " . ($properties{'allow_access_from'} || "ERROR - ALLOW_ACCESS_FROM NOT CONFIGURED!") . " => Network allow from $allow_from_network\n";
-    $OUT .= "    #  - Effective PULL Users: '" . ($effective_pull_users || "Anonymous") . "' <= (" . ($properties{'pull_groups'} || "none") . "/" . ($properties{'pull_users'}  || "none") . ")\n";
-    $OUT .= "    #  - Effective PUSH Users: '" . ($effective_push_users || "Anonymous") . "' <= (" . ($properties{'push_groups'} || "none") . "/" . ($properties{'push_users'}  || "none") . ")\n";
-    $OUT .= "    #  - Effective PULL/PUSH : '" . ($effective_pull_push_users || "Anonymous") . "'\n";
+      $OUT .= "    # ~~~~~~~~~~~~~~~~~~~~~~~~\n";
+      $OUT .= "    # Git Repository         : $gitpath/$git_repository.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!") . ")\n";
+      $OUT .= "    #  - Allow access from   : " . ($properties{'allow_access_from'} || "ERROR - ALLOW_ACCESS_FROM NOT CONFIGURED!") . " => Network allow from $allow_from_network\n";
+      $OUT .= "    #  - Effective PULL Users: '" . ($effective_pull_users || "Anonymous") . "' <= (" . ($properties{'pull_groups'} || "none") . "/" . ($properties{'pull_users'}  || "none") . ")\n";
+      $OUT .= "    #  - Effective PUSH Users: '" . ($effective_push_users || "Anonymous") . "' <= (" . ($properties{'push_groups'} || "none") . "/" . ($properties{'push_users'}  || "none") . ")\n";
+      $OUT .= "    #  - Effective PULL/PUSH : '" . ($effective_pull_push_users || "Anonymous") . "'\n\n";
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~~~ PULL Access Setup
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      #~~~ PULL Access Setup
 
-    $OUT .= "    <Location \"$gitpath/$git_repository.git\"> # for PULL access to $gitpath/$git_repository.git\n\n";
+      $OUT .= "    <Location \"$gitpath/$git_repository.git\"> # PULL access to $gitpath/$git_repository.git\n";
 
-    if( $effective_pull_users ) {
-      $OUT .= "      # PULL Access Control\n";
-      $OUT .= "      AuthType      Basic\n";
-      $OUT .= "      AuthExternal  pwauth\n";
-      $OUT .= "      AuthName      \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!"). ")\"\n";
-      $OUT .= "      Require user  $effective_pull_push_users\n\n";
-      $OUT .= "      # Non-Anonymous PULL requires SSL\n";
-      $OUT .= "      SSLRequireSSL\n";
-    } else {
-      $OUT .= "      # Anoymous Pull Access\n";
-    }
-    $OUT .= "\n";
-    if( $allow_from_network ne 'All' ) {
-      $OUT .= "      # Restricted network access\n";
-      $OUT .= "      Order         Deny,Allow\n";
-      $OUT .= "      Deny          from All\n";
-      $OUT .= "      Allow         from $allow_from_network\n";
-      $OUT .= "      Satisfy       All\n";
-    } else {
-      $OUT .= "      # Internet access enabled\n";
-    }
-    $OUT .= "\n    </Location> # $gitpath/$git_repository.git\n\n";
+      if( $effective_pull_users ) {
+        $OUT .= "        # PULL Access Control\n";
+        $OUT .= "        AuthName          \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!"). ")\"\n";
+        $OUT .= "        AuthType          Basic\n";
+        $OUT .= "        AuthExternal      pwauth\n";
+        $OUT .= "        Require           user  $effective_pull_push_users\n";
+        $OUT .= "        SSLRequireSSL     # Non-Anonymous PULL requires SSL\n";
+      } else {
+        $OUT .= "        # Anonymous PULL Access\n";
+      }
+      if( $allow_from_network ne 'All' ) {
+        $OUT .= "        # Restricted network access\n";
+        $OUT .= "        Order         Deny,Allow\n";
+        $OUT .= "        Deny          from All\n";
+        $OUT .= "        Allow         from $allow_from_network\n";
+      } else {
+        $OUT .= "        # Internet access enabled\n";
+      }
+      $OUT .= "        Satisfy       All\n";
+    
+      $OUT .= "    </Location> # $gitpath/$git_repository.git\n\n";
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~~~ PUSH Access Setup - uses a virtual /push directory in the path that was
-    #                        setup using previus RewriteCond rules looking for the
-    #                        git-receive-pack items that Git requests when pushing.
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      #~~~ PUSH Access Setup - uses a virtual /push directory in the path that was
+      #                        setup using previus RewriteCond rules looking for the
+      #                        git-receive-pack items that Git requests when pushing.
 
-    $OUT .= "    <Location \"/push$gitpath/$git_repository.git\">  # for PUSH access to $gitpath/$git_repository.git\n\n";
+      $OUT .= "    <Location \"/push$gitpath/$git_repository.git\">  # PUSH access to $gitpath/$git_repository.git\n";
 
-    if( $effective_push_users ) {
-      $OUT .= "      # PUSH Access Control\n";
-      $OUT .= "      AuthType      Basic\n";
-      $OUT .= "      AuthExternal  pwauth\n";
-      $OUT .= "      AuthName      \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESC   RIPTION NOT CONFIGURED!"). ")\"\n";
-      $OUT .= "      Require user  $effective_push_users\n\n";
-      $OUT .= "      # Non-Anonymous PUSH requires SSL\n";
-      $OUT .= "      SSLRequireSSL\n";
-    } else {
-      $OUT .= "      # Anoymous PUSH Access\n";
-    }
-    $OUT .= "\n";
-    if( $allow_from_network ne 'All' ) {
-      $OUT .= "      # Restricted network access\n";
-      $OUT .= "      Order         Deny,Allow\n";
-      $OUT .= "      Deny          from All\n";
-      $OUT .= "      Allow         from $allow_from_network\n";
-      $OUT .= "      Satisfy       All\n";
-    } else {
-      $OUT .= "      # Internet access enabled\n";
-    }
-      $OUT .= "\n    </Location> # /push$gitpath/$git_repository.git\n\n";
+      if( $effective_push_users ) {
+        $OUT .= "        # PUSH Access Control\n";
+        $OUT .= "        AuthName          \"Git repository: $git_repository\.git (" . ($properties{'description'} || "ERROR - DESCRIPTION NOT CONFIGURED!"). ")\"\n";
+        $OUT .= "        AuthType          Basic\n";
+        $OUT .= "        AuthExternal      pwauth\n";
+        $OUT .= "        Require           user  $effective_push_users\n";
+        $OUT .= "        SSLRequireSSL     # Non-Anonymous PUSH requires SSL\n";
+      } else {
+        $OUT .= "        # Anonymous PUSH Access\n";
+      }
+      if( $allow_from_network ne 'All' ) {
+        $OUT .= "        # Restricted network access\n";
+        $OUT .= "        Order         Deny,Allow\n";
+        $OUT .= "        Deny          from All\n";
+        $OUT .= "        Allow         from $allow_from_network\n";
+      } else {
+        $OUT .= "        # Internet access enabled\n";
+      }
+      $OUT .= "        Satisfy       All\n";
+    
+      $OUT .= "    </Location> # /push$gitpath/$git_repository.git\n\n";
     }
 
-    $OUT .= "    # ~~~ END OF GIT REPOSITORIES CONFIGURATION ~~~\n\n";
+    $OUT .= "    # ~~~ GIT REPOSITORIES CONFIGURATION END ~~~\n";
+    $OUT .= "    # ~~~ GIT HTTPS CONFIGURATION END ~~~\n";
   }
 }
