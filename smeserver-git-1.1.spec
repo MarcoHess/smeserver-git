@@ -33,6 +33,7 @@ host.com/git. Repositories are then available as https://host.com/git/gitrepo.gi
 - Fixed pwauth setup.
 - Added AuthBasicProvider external in authentication setup.
 - Fixed GitWebRoot variable scope.
+- Allow adjustment of gitweb static path for git 1.7 vs. git 1.8
 
 * Fri May 30 2014 Marco Hess <marco.hess@through-ip.com> 1.0.0-37
 - Fixed the HTTPS redirection loop. HTTPS redirection is now only done on the HTTP part of of

@@ -114,16 +114,29 @@
   # Root of the git repositories directory tree.
   my $GitRepositoryRoot = "/home/e-smith/files/git";
 
-  # Installation location of the gitweb executables
-  # Location seems to have shifted between git 1.7 and git 1.8
+  # Find installation location of the gitweb executables
+  # and gitweb.css files can vary a bit between git versions.
 
   my $GitWebRoot = "";
+  my $GitWebCSS = "";
   if( $gitweb eq 'enabled' ) {
-    if( -e "/usr/share/gitweb/gitweb.cgi" ) {
+    if( -e "/usr/share/gitweb/gitweb.cgi" ) { 
+      # Git 1.7
       $GitWebRoot = "/usr/share/gitweb";
+      $GitWebCSS  = "";
     }
-    elsif( -e "/var/www/git/gitweb.cgi" ) {
+    elsif( -e "/var/www/git/gitweb.cgi" ) { 
+      # Git 1.8+
       $GitWebRoot = "/var/www/git";
+      if( -e "/var/www/git/static/gitweb.css" ) { 
+        $GitWebCSS  = "/static";
+      }  
+      elsif( -e -e "/var/www/git/gitweb.css" ) { 
+        $GitWebCSS  = "";
+      }
+      else {
+        die "Gitweb is enabled, but could not find 'gitweb.css'!\n";
+      }
     }
     else {
       die "Gitweb is enabled, but could not find 'gitweb.cgi'!\n";
@@ -289,19 +302,15 @@
 
       if( $gitweb_theme eq 'enabled' ) {
         $OUT .= "    # config getprop git GitWebTheme == enabled\n";
-        $OUT .= "    # Overide the standard gitweb CSS, JS and image files to enable the theme:\n";
-        $OUT .= "    Alias  $gitpath/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
-        $OUT .= "    Alias  $gitpath/git-favicon.png /etc/e-smith/web/common/gitweb/git-favicon.png\n";
-        $OUT .= "    Alias  $gitpath/git-logo.png    /etc/e-smith/web/common/gitweb/git-logo.png\n";
+        $OUT .= "    # Overide the standard gitweb CSS, JS and image files to enable the theme.\n";
+        $OUT .= "    Alias  $gitpath$GitWebCSS/gitweb.css      /etc/e-smith/web/common/gitweb/gitweb.css\n";
+        $OUT .= "    Alias  $gitpath$GitWebCSS/git-favicon.png /etc/e-smith/web/common/gitweb/git-favicon.png\n";
+        $OUT .= "    Alias  $gitpath$GitWebCSS/git-logo.png    /etc/e-smith/web/common/gitweb/git-logo.png\n";
         $OUT .= "\n";
       }
       $OUT .= "    # Static & CGI files used by Gitweb. \n";
       $OUT .= "    Alias        $gitpath                 $GitWebRoot\n";
       $OUT .= "\n";
-
-      #    $OUT .= "    # Serve HTML with gitweb. Use Alias to also allow serving required CSS and JS files.\n";
-      #    $OUT .= "    ScriptAlias  $gitpath                 $GitWebRoot/gitweb.cgi\n";
-      #    $OUT .= "\n";
 
       $OUT .= "    # Access permissions for gitweb scripts\n";
       $OUT .= "    <Directory \"$GitWebRoot\">\n";
