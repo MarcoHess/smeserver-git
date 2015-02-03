@@ -1,15 +1,26 @@
+####
+# Password Check - Returns 0 when password validated OK, or !0 otherwise
+#
+
+$pwauth_path= "/usr/bin/pwauth";
+sub trypass \{
+   my $userid= $_[0];
+   my $passwd= $_[1];
+
+   open PWAUTH, "|$pwauth_path" or die("Could not run $pwauth_path");
+   print PWAUTH "$userid\n$passwd\n";
+   close PWAUTH;
+   return $?;
+\}
 
 ####
 # Install a export authorisation hook to ensure Gitweb only list thise projects that the user
 # is authorised to see.
-
 #                               local_unauthorised internet_unauthorised local_authorised internet_authorised
 # internet anonymous pull                Yes                Yes                Yes               
 # local    anonymous pull                Yes                No                 Yes
 # internet && authorised pull            Yes                No                 Yes
 # local    && authorised pull            Yes                No                 Yes
-
-
 
 use esmith::NetworksDB;
 use esmith::GitDB;
@@ -17,68 +28,110 @@ use MIME::Base64;
 use NetAddr::IP;
 
 $export_auth_hook = sub \{
+  my $isindex = 0;
   my $projectdir = shift;
 
+  our $cgi;
+
+  # If "reqauth" parameter is set, send back a 401 if there's no auth
+  if ($cgi->param("reqauth") and not defined $ENV\{"HTTP_AUTHORIZATION"\}) \{
+    auth_error("401 Unauthorized",
+               "You wanted to provide authorization, so I asked for it.");
+  \}
+  
+  # Don't allow hidden .git dirs (like the toplevel one)
+  return 0 if ($projectdir =~ m-/.git-);
+  
+  if ($action =~ m/^(?:opml|project_list|project_index)$/) \{
+    # They're viewing an index.
+ 
+	# If gitweb-noindex is in the repo, disallow it now.
+	return 0 if (-e "$projectdir/gitweb-noindex");
+  
+    $isindex = 1;
+  \}
+  
+  # Check authorisation 
+  
   my $repository_view_allowed = 0;  
   my $internet_access_allowed = 0;
-  my $host_is_local           = 0; # Will be 1 when the host request is from the local network.
   my $host_request_allowed    = 0; # Will be 1 when the view is allowed based on the current host address and 'allow_access_from' setting
   my $anonymous_pull          = 0; # Will be 1 when the repository does not require pull authorisation
   my $authorised_repository_view_allowed = 0; # Will be 1 when the authorised user has pull permissions on the repository 
+  my $pull_users              = '';
 
+  # Retrieve project properties from DB
+  
   if($projectdir =~ (/(.*?)\.git/)) \{
     my $projectname = basename($1);
 
     # Retrieve project properties from database
     my $git_db = esmith::GitDB->open_ro() or
-      die "Could not open the Git repository database!\nIs it readable by the web server?\n";
+      auth_error( "500 Internal Error", "Could not open the Git repository database!\nDoes the web server have permission to read the git database file?\n" );
       
     my $repository = $git_db->get($projectname) or 
-      die "The git repository '$projectname' does not seem to exist in the Git repository database!\n";
+      auth_error( "500 Internal Error", "The git repository '$projectname' does not seem to exist in the repository database!\n" );
       
     my %properties = $repository->props;  
 
     # Check if the request is from a local IP address for this host
     my $networks_db = esmith::NetworksDB->open_ro() or
-      die "Could not open the networks database!\n";
+      auth_error( "500 Internal Error", "Could not open the networks database!\n" );
       
+    # Get server private IP address and mask for access to the local network only
     my @network_setting = split(/[\/ ]/, $networks_db->local_access_spec('private'));
+    
+    # Check if the REMOTE_ADDR is within the range of the 'private' address for this server
     my $remote_addr = NetAddr::IP->new( $ENV\{'REMOTE_ADDR'\} );
     if( $remote_addr->within( new NetAddr::IP @network_setting[1], @network_setting[2] ) ) \{
-      $host_is_local = 1;
+      return 1; # EXIT LOCAL HOST -> REPOSITORY VIEW ALLOWED
     \}
 
-    # Check the configured network access permissions. 
+    # See if internet access is allowed on this repository.
     if ($properties\{'allow_access_from'\}) \{
       if ($properties\{'allow_access_from'\} eq 'internet') \{
         $internet_access_allowed = 1;
       \}
     \}
 
-    # Check the configured access permissions for pull access
+    # See if anonymous pull is allowed on this repository.
     if( ($properties\{'pull_groups'\} eq '') && ($properties\{'pull_users'\} eq '') ) \{
       $anonymous_pull = 1;
     \}
 
+    if( $internet_access_allowed && $anonymous_pull ) \{
+      return 1;  # EXIT INTERNET ACCESS WITH ANONYMOUS PULL -> REPOSITORY VIEW ALLOWED
+    \}
+
+    # For the remaining access from the internet, we need an authorised user
+    # that is allowed to either pull or push this repository.
+    
     # Check if we have:
     # a) a user that is listed in the repository pull or push permissions
     # b) valid credentials i.e password can be validated.
     if( $ENV\{'HTTP_AUTHORIZATION'\} ) \{
       my @http_authorisation = split(/ /, $ENV\{'HTTP_AUTHORIZATION'\} );
       my @http_digest = split( /:/, decode_base64( @http_authorisation[1] ) );
-      if( @http_digest[0] = 'nobody' ) \{
-        #die "User '@http_digest[0]' Password '@http_digest[1]' @network_setting[0]-@network_setting[1]-@network_setting[2] \n";
+      
+      # See who the effective users are for this repository. The AccountsDB needs
+      # to have world read permissions to allow this to work.
+      my $effective_pull_users = $git_db->effective_users_list_from( $properties\{'pull_groups'\},  
+                                                                     $properties\{'pull_users'\} ); 
+      if( grep( /^@http_digest[0]$/, $effective_pull_users ) ) \{
+        # USER IN AUTHORISED LIST -> CHECK PASSWORD
+        if( trypass( @http_digest[0], @http_digest[1] ) == 0 ) \{
+          return 1;  # EXIT USER IS AUTHORISED -> REPOSITORY VIEW ALLOWED
+        \} else \{
+          auth_error( "401 Unauthorized", "Permission denied" );
+        \}
+      \} else \{
+        return 0; # EXIT USER NOT IN AUTHORISED LIST -> DENY REPOSITORY VIEW
       \}
+    \} else \{
+      return 0; # EXIT NO AUTHORISATION SUPPLIED -> DENY REPOSITORY VIEW
     \}
-
   \}
-
-  # local host are allowed to see all repositories
-  if( $host_is_local ) \{
-     $repository_view_allowed = 1;
-  \} elsif( $internet_access_allowed && $anonymous_pull ) \{
-     $repository_view_allowed = 1; 
-  \};
   
-  return ( $repository_view_allowed );
+  # Not reached. No access.
+  return 0;
 \};
