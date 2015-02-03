@@ -27,6 +27,10 @@ installs and enables the git server on the current host like in
 host.com/git. Repositories are then available as https://host.com/git/gitrepo.git.
 
 %changelog
+* Tue Feb 2 2015 Marco Hess <marco.hess@through-ip.com> 1.0.0-39
+- Fixups of 1.1 incompatibilities with older apache.
+- Fixup of GitWeb CSS/JS files under 'static' in this version.
+
 * Tue Feb 2 2015 Marco Hess <marco.hess@through-ip.com> 1.0.0-38
 - Backport changes from 1.1.
 
