@@ -1,6 +1,6 @@
 %define name smeserver-gitweb
 %define version 1.0.0
-%define release 14
+%define release 15
 Summary: GitWeb is a web based Git repository viewer on SME Server
 Name: %{name}
 Version: %{version}
@@ -24,10 +24,12 @@ AutoReqProv: no
 HTTP access to https://git.host.com provides a gitweb view of the repositories.
 
 %changelog
+* Tue Feb 2 2015 Marco Hess <marco.hess@through-ip.com> 1.0.0-15
+- pwauth is in /usr/lib/httpd/modules/pwauth for this SME.
+
 * Tue Feb 2 2015 Marco Hess <marco.hess@through-ip.com> 1.0.0-14
 - Fixed test in user authorisation check for perl 5.8.
 
-%changelog
 * Tue Feb 2 2015 Marco Hess <marco.hess@through-ip.com> 1.0.0-13
 - Backport changes from 1.1.
 - Fixed user authorisation for repositories viewable from internet

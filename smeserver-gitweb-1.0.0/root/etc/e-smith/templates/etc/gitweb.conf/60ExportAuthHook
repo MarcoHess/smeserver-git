@@ -2,7 +2,7 @@
 # Password Check - Returns 0 when password validated OK, or !0 otherwise
 #
 
-$pwauth_path= "/usr/bin/pwauth";
+$pwauth_path= "/usr/lib/httpd/modules/pwauth";
 sub trypass \{
    my $userid= $_[0];
    my $passwd= $_[1];
