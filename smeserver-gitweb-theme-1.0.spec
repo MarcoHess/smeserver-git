@@ -1,6 +1,6 @@
 %define name smeserver-gitweb-theme
 %define version 1.0.0
-%define release 4
+%define release 5
 Summary: GitHub inspired look and feel for smeserver-gitweb
 Name: %{name}
 Version: %{version}
@@ -23,6 +23,11 @@ Optional package for use with smeserver-gitweb to enable a more GitHub inspired
 theme for gitweb. Based on http://kogakure.github.com/gitweb-theme/
 
 %changelog
+* Tue Feb 2 2015 Marco Hess <marco.hess@through-ip.com> 1.0.0-4
+- Updated to latest CSS for gitweb-theme.
+- Updated icons to latest git types.
+- Removed own gitweb.js
+
 * Mon Jul 23 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
 - initial release
 

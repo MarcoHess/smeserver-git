@@ -25,6 +25,9 @@ theme for gitweb. Based on http://kogakure.github.com/gitweb-theme/
 %changelog
 * Fri Jan 30 2015 Marco Hess <marco.hess@through-ip.com> 1.1.0-0
 - Package rebuild for SME9
+- Updated to latest CSS for gitweb-theme.
+- Updated icons to latest git types.
+- Removed own gitweb.js
 
 * Mon Jul 23 2012 Marco Hess <marco.hess@through-ip.com> 1.0.0-3
 - initial release
