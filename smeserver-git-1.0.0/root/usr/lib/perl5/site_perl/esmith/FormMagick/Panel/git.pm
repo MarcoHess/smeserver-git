@@ -3,7 +3,7 @@
 # vim: ft=perl ts=2 sw=2 et:
 #----------------------------------------------------------------------
 #
-# Copyright (C) 2012 - Marco Hess <marco.hess@through-ip.com>
+# Copyright (C) 2012-2015 - Marco Hess <marco.hess@through-ip.com>
 #
 # This file is part of the "Git Repositories" panel in the
 # SME Server server-manager panel to configure git repositories.
@@ -21,8 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-#----------------------------------------------------------------------
-# $Id: git.pm 1 2012-03-23 11:25:58Z marco $
 #----------------------------------------------------------------------
 
 package esmith::FormMagick::Panel::git;
@@ -67,7 +65,7 @@ our @EXPORT = qw(
   git_repository_print_privileges_note
   git_repository_print_groups_and_users
   max_repository_name_length
-get_config_value
+  get_config_value
   getExtraParams
   git_repository_print_save_or_add_button
   validate_radio
@@ -275,8 +273,8 @@ sub git_repository_print_privileges_note
 
 #----------------------------------------------------------------------
 # git_repository_print_save_or_add_button()
-# Prints the ADD button when a new repository is addded and the SAVE buttom 
-# whem modifications are made.
+# Prints the ADD button when a new repository is added and the SAVE button 
+# when modifications are made.
 
 sub git_repository_print_save_or_add_button
 {
@@ -294,7 +292,7 @@ sub git_repository_print_save_or_add_button
 # HELPER FUNCTIONS FOR THE PANEL
 #######################################################################
 #
-# Routines for modifying the database and signaling events 
+# Routines for modifying the database and signalling events 
 # from the server-manager panel
 
 =head2 build_repository_cgi_params($self, $repositoryName, %oldprops)
@@ -351,12 +349,12 @@ sub git_repository_group_list
 # git_repository_user_list()
 # Returns a hash of users for the Create/Modify screen's user field's
 # drop down list, It explicitly adds the special user 'admin' as this 
-# user is not listed in the accounds database.
+# user is not listed in the accounts database.
 
 sub git_repository_user_list
 {
   my $self  = shift;
-  my @users = $account_db->users();
+  my @users = $account_db->activeUsers();
   my %users = ( admin => $self->localise('GIT_USER_ADMINISTRATOR') ." (admin)" );
   
   foreach my $user (@users) 
@@ -458,97 +456,6 @@ sub get_config_value
   }
 }
 
-#----------------------------------------------------------------------
-
-# git_repository_print_domains()
-
-# When this server has more than one domain this function takes
-# the list of domains and returns a string of html checkboxes
-# for all these domains. 
-
-# Those domains that are listed with this git environment 
-# will have their checkbox checked.
-
-# sub git_repository_print_domains
-# {
-  # # Retrieve the Git account name from the CGI parameters
-  # my $self   = shift;
-  # my $name   = $self->{'cgi'}->param('name');
-  # my $action = $self->{'cgi'}->param("action") || '';
-  # my $out    = "";
-
-  # # Get a full list of all the domains on this server.
-  # my @domains = $DomainsDB->get_all_by_prop( type => 'domain' );
-  # my $numdomains = @domains;
-
-  # # If there is more than one domain, we generate a list
-  # # of checkboxes. Otherwise we just show the primary domain.
-  # if ($numdomains > 1) {
-
-    # # Get the list of the Domains for which Git is active.
-    # my $git_domains_list = "";
-    # if ($AccountsDB->get($name)) {
-      # $git_domains_list = $AccountsDB->get($name)->prop('Domains');
-    # }
-
-    # # Split the comma separated list into the individual bits.
-    # my %git_domains;
-    # foreach my $git_domain ( split ( /,/, $git_domains_list ) ) {
-      # $git_domains{$git_domain} = 1;
-    # }
-
-    # # Now generate the table of domains with a checkbox in front of it.
-    # # If the domain is in our listed domains for Git, the
-    # # checkbox will show checked.
-    # $out  =     "    <tr>\n";
-    # $out .=     "      <td colspan=2>" . $fm->localise('GIT_FIELD_DOMAINS_DESCRIPTION') . "</td>";
-    # $out .=     "    </tr>\n";
-    # $out .=     "    <tr>\n";
-    # $out .=     "      <td class=\"sme-noborders-label\">" . $fm->localise('GIT_FIELD_DOMAINS') . "</td>\n";
-    # $out .=     "      <td>\n";
-    # $out .=     "        <table border='0' cellspacing='0' cellpadding='0'>\n";
-    # $out .=     "          <tr>\n";
-
-    # foreach my $domain (sort @domains) {
-      # # If this is a ADD form, we default check all domains, otherwise only
-      # # those that are in our Git configuration.
-      # my $checked = "";
-      # if ( $action eq 'modify' ) {
-        # if ( $git_domains{ $domain->key() } ) {
-          # $checked = "checked";
-        # }
-      # } else   {
-        # $checked = "checked";
-      # }
-      # $out .= "          <tr>\n";
-      # $out .= "            <td><input type=\"checkbox\" name=\"gitDomains\" $checked value=\"" . $domain->key . "\"></td>\n";
-      # $out .= "            <td>" . $domain->key . "</td>\n";
-      # $out .= "          </tr>\n";
-    # }
-
-    # $out .=     "        </table>\n";
-    # $out .=     "      </td>\n";
-    # $out .=     "    </tr>\n";
-  # }
-  # else
-  # {
-    # # We only have a single domain, so we just show this domain but without the
-    # # checkbox (so it can't be unchecked).
-    # my $domainname = $ConfigDB->get('DomainName')->value();
-    # $out  =     "    <tr>\n";
-    # $out .=     "      <td colspan=2>" . $fm->localise('GIT_FIELD_DOMAIN_DESCRIPTION') . "</td>";
-    # $out .=     "    </tr>\n";
-    # $out .=     "    <tr>\n";
-    # $out .=     "      <td class=\"sme-noborders-label\">" . $fm->localise('GIT_FIELD_DOMAIN') . "</td>\n";
-    # $out .=     "      <td><input type=\"hidden\" name=\"tracDomains\" value=\"" . $domainname . "\">";
-    # $out .=                $domainname . "</td>\n";
-    # $out .=     "    </tr>\n";
-  # }
-
-  # return $out;
-# }
-
-
 #######################################################################
 # THE ROUTINES THAT ACTUALLY DO THE WORK
 #######################################################################
@@ -558,7 +465,7 @@ sub get_config_value
 
 sub git_handle_configuration_update 
 {
-  my ($self) = @_;
+  my( $self ) = @_;
 
   if( system ( "/sbin/e-smith/signal-event", "git-modify" ) == 0 ) {
     $self->success("GIT_SUCCESS_CONFIGURATION_UPDATE");
@@ -573,7 +480,7 @@ sub git_handle_configuration_update
 
 sub git_handle_create_or_modify_repository 
 {
-  my ($self) = @_;
+  my( $self ) = @_;
 
   my $action = $self->cgi->param("action") || '';
   if( $action eq "create") {
@@ -589,7 +496,7 @@ sub git_handle_create_or_modify_repository
 
 sub git_handle_create_repository 
 {
-  my ($self) = @_;
+  my( $self ) = @_;
   my $repositoryName = $self->cgi->param('name');
   my $msg;
 
@@ -686,7 +593,7 @@ sub git_handle_create_repository
 
 sub git_handle_modify_repository 
 {
-  my ($self) = @_;
+  my( $self ) = @_;
   my $repositoryName = $self->cgi->param('name');
   my $msg;
 
@@ -773,7 +680,7 @@ sub git_handle_modify_repository
 
 sub git_handle_remove_repository 
 {
-  my ($self) = @_;
+  my( $self ) = @_;
   my $repositoryName = $self->cgi->param('name');
   if( my $repository = $git_db->get($repositoryName) ) {
     if( $repository->prop('type') eq 'repository' ) {
@@ -845,7 +752,7 @@ sub git_repository_validate_name
 
 sub git_repository_access_allowed_from 
 {
-  my ($self, $accessAllowedFrom) = @_;
+  my( $self, $accessAllowedFrom ) = @_;
 
   if( $accessAllowedFrom eq 'internet' ) {
     return $self->localise( 'GIT_ACCESS_ALLOWED_FROM_INTERNET' );
@@ -861,11 +768,11 @@ sub git_repository_access_allowed_from
 #
 # Formats a print string for use in the repository table listing the groups and users
 # that are allowed access. Groups are printed in bold. When there are no groups or users
-# it returns Anonymous.
+# it returns Anonymous in italics.
 
 sub git_repository_print_groups_and_users 
 {
-  my ($self, $groups, $users) = @_;
+  my( $self, $groups, $users ) = @_;
 
   unless( $groups || $users ) {
     return "<i>" . $self->localise( 'GIT_ANONYMOUS' ) . "</i>";
@@ -873,12 +780,23 @@ sub git_repository_print_groups_and_users
    
   my $print_groups = "";
   if( $groups ) {
-    $print_groups =  "<b>" . join("<br/>", split(FS, $groups)) . "</b><br/>";
+    $print_groups =  "<b>" . join("<br/>", split( FS, $groups ) ) . "</b><br/>";
   }
   
+  my @active_system_users = $account_db->activeUsers();
   my $print_users = "";
   if( $users ) {
-    $print_users =  join("<br/>", split(FS, $users));
+    foreach my $user ( split( FS, $users ) ) {
+      if( grep( /^$user$/, @active_system_users ) ) {
+        $print_users = $print_users . $user . "<br/>";
+      }
+    }
+    unless( length( $print_users ) > 0 )
+    {
+      # Ended up with an empty list of users as none were active
+      # so add 'admin' as active user.
+      $print_users =  $print_users . 'admin' . '<br/>';
+    }
   }
   
   return $print_groups . $print_users;    
@@ -886,7 +804,7 @@ sub git_repository_print_groups_and_users
 
 #----------------------------------------------------------------------
 # git_repository_validate_name_does_not_exist()
-# Check the proposed repository name for clashes with existing respositories.
+# Check the proposed repository name for clashes with existing repositories.
 
 sub git_repository_validate_name_does_not_exist
 {
@@ -947,7 +865,7 @@ sub git_repository_validate_description
 
 #----------------------------------------------------------------------
 # validate_radio()
-# Checks wether a value is checked for a radio button
+# Checks whether a value is checked for a radio button
 
 sub validate_radio 
 {

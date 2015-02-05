@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------
 #
-# Copyright (C) 2012 - Marco Hess <marco.hess@through-ip.com>
+# Copyright (C) 2012-2015 - Marco Hess <marco.hess@through-ip.com>
 #
 # This file is part of the "Git Repositories" panel in the
 # SME Server server-manager panel to configure git repositories.
@@ -34,7 +34,7 @@ use esmith::DB::db;
 
 =head1 NAME
 
-esmith::GitDB - interface to the Git respositories database
+esmith::GitDB - interface to the Git repositories database
 
 =head1 SYNOPSIS
 
@@ -83,12 +83,30 @@ sub AUTOLOAD {
   }
 }
 
+#----------------------------------------------------------------------
+
+### Generate an effective users list from them given list of
+### groups and users where groups are expanded in their list
+### of members. Members from groups are assumed to valid
+### members. Individual users are validated to be an active
+### system user. In case there are groups and user defined
+### but we end up with an empty list of users, 'admin' is 
+### added to prevent an empty list and thus prevent unintentional
+### Anonymous access to the git repository.
 sub effective_users_list_from {
-  my($class,$groups1, $users1,$groups2, $users2) = @_;
+  my( $class, $groups1, $users1, $groups2, $users2 ) = @_;
 
   ### Generate effective list of users from the groups and individual users combined ### 
   my @effective_users_list;
 
+  ### Open the accounts database
+  my $accounts_db = esmith::AccountsDB->open_ro()
+    or die( "Failed to open Accounts database : $!. The database file may not be readable by this user.\n" );
+
+  ### Get the list of active system users so we can validate
+  ### the git users against this list.
+  my @active_system_users = $accounts_db->activeUsers();
+  
   ### Collect users listed for the named groups
   if( $groups1 || $groups2 ) {
     my @groups;
@@ -98,36 +116,65 @@ sub effective_users_list_from {
     if( $groups2 ) {
       push @groups, split ( /,/, $groups2 );
     }
-    my $accounts_db = esmith::AccountsDB->open;
-    foreach my $group (@groups) {
+      
+    foreach my $group ( @groups ) {
       if( $group eq 'admin' ) {
         push @effective_users_list, 'admin';
       } elsif( $group eq 'shared' ) {
-        push @effective_users_list, $_->key foreach( $accounts_db->users );
+        push @effective_users_list, $_->key foreach( @active_system_users );
       } else {
-        my $record = $accounts_db->get($group);
-        if ($record) {
-          my $members = $record->prop('Members') || "";
-          if (length($members) > 0) {
-            push @effective_users_list, split (/,/, $members);
+        my $record = $accounts_db->get( $group );
+        if( $record ) {
+          my $members = $record->prop( 'Members' ) || "";
+          if( length($members) > 0 ) {
+            push @effective_users_list, split( /,/, $members );
           }
         }
         undef $record;
       }
     }
-  }
     
-  ### Combine individual users into the list generated so far
-  if( $users1 ) {
-    push @effective_users_list, split ( /,/, $users1 );
+    ### When we reach here and there are no effective users even though
+    ### one or more groups were defined, we need to prevent that we 
+    ### unintentionally allow Anonymous access to the repository.
+    ### So we push the 'admin' user as an effective user. This 
+    ### prevents the http.conf script allowing anonymous access.
+    unless( @effective_users_list ) {
+      push @effective_users_list, 'admin';      
+    }
   }
-  if( $users2 ) {
-    push @effective_users_list, split ( /,/, $users2 );
+
+  ### Combine individual users into the list generated so far
+  ### Ensure that the user is an active SME user as the user
+  ### could have been disabled or deleted.
+  if( $users1 || $users2 ) {
+    if( $users1 ) {
+      foreach my $user ( split ( /,/, $users1 ) ) {
+        if( grep( /^$user$/, @active_system_users ) ) {      
+          push @effective_users_list, $user;
+        }
+      }
+    }
+    if( $users2 ) {
+      foreach my $user ( split ( /,/, $users2 ) ) {
+        if( grep( /^$user$/, @active_system_users ) ) {      
+          push @effective_users_list, $user;
+        }
+      }
+    }
+    
+    ### Again, when we reach here and there are still no effective 
+    ### users even though some users were specified, we need to 
+    ### prevent unintentionally Anonymous access to the repository
+    ### and we push the 'admin' user as a minimum effective user.
+    unless( @effective_users_list ) {
+      push @effective_users_list, 'admin';      
+    }
   }
 
   ### When there is more than one entry, sort it
   if( @effective_users_list > 1 ) {
-    @effective_users_list = sort(@effective_users_list);
+    @effective_users_list = sort( @effective_users_list );
   }
 
   ### Ensure we only have unique entries
@@ -140,3 +187,4 @@ sub effective_users_list_from {
   return $effective_users_list;
 }
 
+#----------------------------------------------------------------------
